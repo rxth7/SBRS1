@@ -13,7 +13,7 @@ const fallbackImages = [
 export default function AlumniMeet() {
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [images, setImages] = useState<AlumniMeetImage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     getAlumniMeetImages().then((data) => {
