@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 100% 97%;
+    --foreground: 160 40% 15%;
+    --card: 30 33% 92%;
+    --card-foreground: 160 40% 15%;
+    --popover: 30 100% 97%;
+    --popover-foreground: 160 40% 15%;
+    --primary: 43 74% 49%;
+    --primary-foreground: 30 100% 97%;
+    --secondary: 160 40% 15%;
+    --secondary-foreground: 30 100% 97%;
+    --muted: 30 33% 92%;
+    --muted-foreground: 160 14% 40%;
+    --accent: 43 74% 49%;
+    --accent-foreground: 160 40% 15%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 160 40% 15% / 0.15;
+    --input: 160 40% 15% / 0.15;
+    --ring: 43 74% 49%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #FFF8F0;
+    color: #1B4332;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+  }
+}
+
+@layer components {
+  .section-padding {
+    @apply py-20 lg:py-28;
+  }
+
+  .page-padding {
+    @apply px-4 sm:px-6 lg:px-[2vw];
+  }
+
+  .content-max-width {
+    @apply max-w-[1400px] mx-auto;
+  }
+
+  .nav-link {
+    @apply text-[10px] font-medium uppercase tracking-[0.06em] text-ivory transition-colors duration-300;
+  }
+
+  .nav-link:hover {
+    @apply text-saffron;
+  }
+
+  .section-title {
+    @apply font-poppins text-[clamp(2rem,4.5vw,4rem)] leading-[1] tracking-[-0.02em] text-forest;
+  }
+
+  .section-title-light {
+    @apply font-poppins text-[clamp(2rem,4.5vw,4rem)] leading-[1] tracking-[-0.02em] text-ivory;
+  }
+
+  .card-bg {
+    @apply bg-cream border border-forest/10 rounded-lg;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-8 py-4 bg-saffron text-forest font-inter text-xs font-semibold uppercase tracking-[0.1em] rounded-lg transition-all duration-300 hover:bg-saffron-deep hover:shadow-lg;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center px-8 py-4 border-2 border-forest text-forest font-inter text-xs font-semibold uppercase tracking-[0.1em] rounded-lg transition-all duration-300 hover:bg-forest hover:text-ivory;
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #DAA520 0%, #B8860B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  .animate-spin-slow {
+    animation: spin 40s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 1s ease-out forwards;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
