@@ -128,52 +128,15 @@ export default function FacultyGallery() {
       </section>
       )}
 
-      {/* Primary Teachers */}
+      {/* Faculties */}
       <section className="section-padding">
         <div className="content-max-width page-padding">
-          <h2 className="section-title text-center mb-10">Primary Teachers</h2>
+          <h2 className="section-title text-center mb-10">Faculties</h2>
           {loading ? (
             <div className="text-center py-8"><div className="animate-spin h-6 w-6 border-2 border-saffron border-t-transparent rounded-full mx-auto" /></div>
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {primaryTeachers.map((teacher) => (
-                <div
-                  key={teacher.id}
-                  className="bg-white rounded-xl overflow-hidden border border-forest/10 shadow-sm hover:shadow-md hover:border-saffron/40 transition-all duration-300"
-                >
-                  <div className="aspect-square overflow-hidden bg-slate">
-                    <img
-                      src={getTeacherImage(teacher)}
-                      alt={teacher.name}
-                      className="w-full h-full object-cover object-top"
-                    />
-                  </div>
-                  <div className="p-3 text-center">
-                    <p className="font-poppins text-[13px] sm:text-sm text-forest leading-snug">
-                      {teacher.name}
-                    </p>
-                    {teacher.designation && (
-                      <span className="mt-1 inline-block bg-saffron/20 text-saffron-deep text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">
-                        {teacher.designation}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Secondary Teachers */}
-      <section className="section-padding bg-cream/50">
-        <div className="content-max-width page-padding">
-          <h2 className="section-title text-center mb-10">Secondary Teachers</h2>
-          {loading ? (
-            <div className="text-center py-8"><div className="animate-spin h-6 w-6 border-2 border-saffron border-t-transparent rounded-full mx-auto" /></div>
-          ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {secondaryList.map((teacher) => (
+              {[...primaryTeachers, ...secondaryList].map((teacher) => (
                 <div
                   key={teacher.id}
                   className="bg-white rounded-xl overflow-hidden border border-forest/10 shadow-sm hover:shadow-md hover:border-saffron/40 transition-all duration-300"
