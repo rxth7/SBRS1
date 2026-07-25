@@ -71,13 +71,13 @@ export default function AlumniAssociation() {
       </section>
 
       <section className="py-12 md:py-16 px-4">
-        <div className="max-w-[1000px] mx-auto space-y-12">
+        <div className="max-w-[1200px] mx-auto space-y-12">
 
           {/* Non-Executive Members (with designations) */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 justify-items-center">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 justify-items-center">
             {displayNonExecutive.map((member) => (
               <div key={member.name} className="flex flex-col items-center">
-                <div className="w-40 h-40 sm:w-60 sm:h-60 rounded-xl overflow-hidden shadow-lg border-4 border-saffron/20 mb-4">
+                <div className="w-36 h-36 sm:w-48 sm:h-48 rounded-xl overflow-hidden shadow-lg border-4 border-saffron/20 mb-4">
                   <img src={member.image} alt={member.name} className="w-full h-full object-cover object-top" />
                 </div>
                 <h3 className="font-playfair text-lg sm:text-xl font-bold text-slate text-center">{member.name}</h3>
