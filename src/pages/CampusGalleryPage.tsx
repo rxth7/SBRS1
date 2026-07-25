@@ -65,7 +65,7 @@ const campusSpecialNames: Record<number, string> = {
   29: 'Annual Day Inauguration',
   31: 'Felicitation to National Achievers',
   32: 'Felicitation of Former Principal',
-  33: 'Felicitation of Former Principal',
+  33: 'Tarang 2025 Inauguration',
   34: 'Felicitation of Former Principal',
   35: 'Felicitation of Former Principal',
   36: 'Felicitation of Former Principal',
