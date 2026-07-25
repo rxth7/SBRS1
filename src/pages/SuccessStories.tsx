@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { ArrowLeft, Star } from 'lucide-react';
+import { ArrowLeft, Star, ChevronRight } from 'lucide-react';
 import { getSuccessStories, type SuccessStory } from '../lib/successStoriesStore';
 
 export default function SuccessStories() {
@@ -13,6 +13,8 @@ export default function SuccessStories() {
       setLoading(false);
     });
   }, []);
+
+  const isSingleStory = stories.length === 1;
 
   return (
     <div className="min-h-screen bg-ivory">
@@ -71,12 +73,25 @@ export default function SuccessStories() {
                         </div>
                       )}
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <h2 className="font-playfair text-xl md:text-2xl text-slate">{item.name}</h2>
                       {item.batch && <p className="font-poppins text-sm text-saffron font-medium">{item.batch}</p>}
                     </div>
                   </div>
-                  <p className="font-poppins text-sm text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: item.story }} />
+
+                  {isSingleStory ? (
+                    <p className="font-poppins text-sm text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: item.story }} />
+                  ) : (
+                    <>
+                      <div className="font-poppins text-sm text-gray-600 leading-relaxed line-clamp-3" dangerouslySetInnerHTML={{ __html: item.story }} />
+                      <Link
+                        to={`/success-stories/${item.id}`}
+                        className="inline-flex items-center gap-1 mt-3 font-poppins text-sm font-semibold text-saffron hover:text-saffron-deep transition-colors"
+                      >
+                        View More <ChevronRight size={16} />
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             ))

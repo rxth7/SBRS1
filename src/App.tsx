@@ -33,6 +33,7 @@ import Curriculum from './pages/Curriculum';
 import Alumni from './pages/Alumni';
 import AlumniAssociation from './pages/AlumniAssociation';
 import AlumniMeet from './pages/AlumniMeet';
+import SuccessStoryDetail from './pages/SuccessStoryDetail';
 import SuccessStories from './pages/SuccessStories';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -182,6 +183,7 @@ function App() {
       <Route path="/alumni-association" element={<AlumniAssociation />} />
       <Route path="/alumni-meet" element={<AlumniMeet />} />
       <Route path="/success-stories" element={<SuccessStories />} />
+      <Route path="/success-stories/:id" element={<SuccessStoryDetail />} />
       <Route path="/admin" element={<AdminRoute />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
