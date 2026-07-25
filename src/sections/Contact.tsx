@@ -17,12 +17,7 @@ const contactInfo = [
     label: 'Phone',
     value: '+91 98445 48735',
     href: 'tel:+919844548735',
-  },
-  {
-    icon: Phone,
-    label: 'Phone',
-    value: '+91 81974 21795',
-    href: 'tel:+918197421795',
+    extraPhones: [{ value: '+91 81974 21795', href: 'tel:+918197421795' }],
   },
   {
     icon: Mail,
@@ -198,15 +193,24 @@ export default function Contact() {
                         href={info.href}
                         target={info.href.startsWith('http') ? '_blank' : undefined}
                         rel={info.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                        className="font-inter text-sm text-ivory hover:text-saffron transition-colors whitespace-pre-line"
+                        className="font-inter text-sm text-ivory hover:text-saffron transition-colors"
                       >
                         {info.value}
                       </a>
                     ) : (
-                      <span className="font-inter text-sm text-ivory whitespace-pre-line">
+                      <span className="font-inter text-sm text-ivory">
                         {info.value}
                       </span>
                     )}
+                    {'extraPhones' in info && (info as { extraPhones: { value: string; href: string }[] }).extraPhones.map((phone) => (
+                      <a
+                        key={phone.href}
+                        href={phone.href}
+                        className="block font-inter text-sm text-ivory hover:text-saffron transition-colors mt-1"
+                      >
+                        {phone.value}
+                      </a>
+                    ))}
                   </div>
                 </div>
               ))}
