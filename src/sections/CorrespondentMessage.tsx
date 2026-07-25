@@ -75,7 +75,7 @@ export default function CorrespondentMessage() {
   return (
     <section
       ref={sectionRef}
-      className="section-padding bg-slate overflow-hidden"
+      className="section-padding bg-cream overflow-hidden"
     >
       <div className="content-max-width page-padding">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-10 items-center">
@@ -87,7 +87,7 @@ export default function CorrespondentMessage() {
 
             <Quote className="w-10 h-10 text-saffron/40 mb-4" />
 
-            <blockquote className="font-playfair text-xl lg:text-2xl text-ivory leading-relaxed mb-6">
+            <blockquote className="font-playfair text-xl lg:text-2xl text-forest leading-relaxed mb-6">
               "Welcome to Sri Bhuvanendra Residential School. We are committed to providing
               quality education that nurtures academic excellence, strong values, and disciplined
               character. With the dedicated support of our teachers, parents, and management, we
@@ -96,10 +96,10 @@ export default function CorrespondentMessage() {
             </blockquote>
 
             <div className="mb-8">
-              <p className="font-poppins text-sm text-ivory font-medium">
+              <p className="font-poppins text-sm text-forest font-medium">
                 — Sri. K. Venkatesh Prabhu
               </p>
-              <p className="font-poppins text-xs text-ivory/60">
+              <p className="font-poppins text-xs text-forest-light">
                 Correspondent, Sri Bhuvanendra Residential School
               </p>
             </div>
@@ -113,7 +113,7 @@ export default function CorrespondentMessage() {
                 alt="Correspondent of SBRS"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate/20 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-cream/20 to-transparent" />
             </div>
             {/* Decorative element */}
             <div className="absolute -bottom-4 -right-4 w-24 h-24 border-2 border-saffron/30 rounded-lg -z-10" />
