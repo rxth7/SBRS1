@@ -74,9 +74,6 @@ export default function Hero() {
     return () => ctx.revert();
   }, []);
 
-  const mottoText = 'बुद्धिर्ज्ञानेन शुद्ध्यति - Wisdom is purified through knowledge • ';
-  const characters = mottoText.split('');
-
   return (
     <section
       id="home"
@@ -131,25 +128,19 @@ export default function Hero() {
           {/* Orbital Motto Spinner */}
           <div
             ref={spinnerRef}
-            className="hidden sm:block mt-6 mx-auto w-[120px] h-[120px] sm:w-[160px] sm:h-[160px] opacity-0"
+            className="hidden sm:block mt-6 mx-auto w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] opacity-0"
           >
             <div className="relative w-full h-full animate-spin-slow">
-              {characters.map((char, index) => {
-                const angle = (360 / characters.length) * index;
-                return (
-                  <span
-                    key={index}
-                    className="absolute left-1/2 top-0 font-poppins text-[9px] sm:text-[11px] text-ivory font-medium"
-                    style={{
-                      transform: `rotate(${angle}deg)`,
-                      transformOrigin: '0 80px',
-                      height: '80px',
-                    }}
-                  >
-                    {char}
-                  </span>
-                );
-              })}
+              <svg viewBox="0 0 180 180" className="w-full h-full">
+                <defs>
+                  <path id="circlePath" d="M 90, 90 m -70, 0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0" fill="none" />
+                </defs>
+                <text className="font-poppins" fontSize="13" fill="white" fontWeight="500" letterSpacing="1">
+                  <textPath href="#circlePath" startOffset="0%">
+                    बुद्धिर्ज्ञानेन शुद्ध्यति — Wisdom is purified through knowledge •
+                  </textPath>
+                </text>
+              </svg>
             </div>
             <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-ivory rounded-full -translate-x-1/2 -translate-y-1/2" />
           </div>
