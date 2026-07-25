@@ -9,6 +9,7 @@ import About from './sections/About';
 import Academics from './sections/Academics';
 import CampusGallery from './sections/CampusGallery';
 import Vision from './sections/Vision';
+import CorrespondentMessage from './sections/CorrespondentMessage';
 import PrincipalMessage from './sections/PrincipalMessage';
 import Admissions from './sections/Admissions';
 import Events from './sections/Events';
@@ -92,6 +93,7 @@ function HomePage() {
         <Academics />
         <CampusGallery />
         <Vision />
+        <CorrespondentMessage />
         <PrincipalMessage />
         <Events />
         <Admissions />
