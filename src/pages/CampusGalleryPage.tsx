@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { Link } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
-import ImageLightbox from '../components/ImageLightbox';
 import { getCampusImages, type CampusImage } from '../lib/campusImagesStore';
 
 const galleryImages = [
@@ -92,12 +91,9 @@ interface ImageData {
 
 const staticImages: ImageData[] = [...galleryImages, ...campusImages];
 
-const ImageCard = memo(function ImageCard({ img, onClick }: { img: ImageData; onClick: () => void }) {
+const ImageCard = memo(function ImageCard({ img }: { img: ImageData }) {
   return (
-    <div
-      className="rounded-xl overflow-hidden bg-forest/10 border border-forest/10 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col"
-      onClick={onClick}
-    >
+    <div className="rounded-xl overflow-hidden bg-forest/10 border border-forest/10 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col">
       <div className={`${img.name ? 'aspect-[4/3]' : 'flex-1'} overflow-hidden`}>
         <img
           src={img.src}
@@ -115,7 +111,6 @@ const ImageCard = memo(function ImageCard({ img, onClick }: { img: ImageData; on
 });
 
 export default function CampusGalleryPage() {
-  const [lightbox, setLightbox] = useState<ImageData | null>(null);
   const [adminImages, setAdminImages] = useState<CampusImage[]>([]);
   const [showCount, setShowCount] = useState(20);
 
@@ -180,7 +175,7 @@ export default function CampusGalleryPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {visibleImages.map((img) => (
-              <ImageCard key={img.src} img={img} onClick={() => setLightbox(img)} />
+              <ImageCard key={img.src} img={img} />
             ))}
           </div>
           {hasMore && (
@@ -195,9 +190,6 @@ export default function CampusGalleryPage() {
           )}
         </div>
       </section>
-      {lightbox && (
-        <ImageLightbox src={lightbox.src} alt={lightbox.alt} title={lightbox.name} onClose={() => setLightbox(null)} />
-      )}
     </div>
   );
 }
