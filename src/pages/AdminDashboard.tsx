@@ -302,11 +302,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setImageError('');
     setFileSizeError('');
 
-    if (!imageTitle.trim() || !imageDesc.trim() || !imageDate.trim()) {
-      setImageError('Title, date, and description are required.');
-      return;
-    }
-
     setImageUploading(true);
 
     try {
@@ -1346,17 +1341,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                     <div>
                       <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Title</label>
                       <input type="text" value={imageTitle} onChange={(e) => setImageTitle(e.target.value)} placeholder="e.g. Annual Day Celebration"
-                        className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors" required />
+                        className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors" />
                     </div>
                     <div>
                       <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Date</label>
                       <input type="text" value={imageDate} onChange={(e) => setImageDate(e.target.value)} placeholder="e.g. 15 August 2026"
-                        className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors" required />
+                        className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors" />
                     </div>
                     <div>
                       <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Description</label>
                       <textarea value={imageDesc} onChange={(e) => setImageDesc(e.target.value)} rows={3} placeholder="Write a short description..."
-                        className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors resize-none" required />
+                        className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors resize-none" />
                     </div>
 
                     <div>
