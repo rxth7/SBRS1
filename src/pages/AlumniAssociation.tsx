@@ -74,14 +74,14 @@ export default function AlumniAssociation() {
         <div className="max-w-[1000px] mx-auto space-y-12">
 
           {/* Non-Executive Members (with designations) */}
-          <div className="flex flex-wrap justify-center gap-12">
+          <div className="grid grid-cols-2 lg:grid-cols-2 gap-8 lg:gap-12 justify-items-center">
             {displayNonExecutive.map((member) => (
               <div key={member.name} className="flex flex-col items-center">
-                <div className="w-60 h-60 rounded-xl overflow-hidden shadow-lg border-4 border-saffron/20 mb-4">
+                <div className="w-40 h-40 sm:w-60 sm:h-60 rounded-xl overflow-hidden shadow-lg border-4 border-saffron/20 mb-4">
                   <img src={member.image} alt={member.name} className="w-full h-full object-cover object-top" />
                 </div>
-                <h3 className="font-playfair text-xl font-bold text-slate">{member.name}</h3>
-                <p className="font-poppins text-sm text-saffron font-medium">{member.designation}</p>
+                <h3 className="font-playfair text-lg sm:text-xl font-bold text-slate text-center">{member.name}</h3>
+                <p className="font-poppins text-xs sm:text-sm text-saffron font-medium text-center">{member.designation}</p>
               </div>
             ))}
           </div>
@@ -90,13 +90,13 @@ export default function AlumniAssociation() {
           {displayExecutive.length > 0 && (
             <div>
               <h2 className="font-playfair text-2xl font-bold text-slate text-center mb-8">Executive Members</h2>
-              <div className="flex flex-wrap justify-center gap-10">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 justify-items-center">
                 {displayExecutive.map((member) => (
-                  <div key={member.name} className="flex flex-col items-center w-48">
-                    <div className="w-44 h-44 rounded-xl overflow-hidden shadow-md border-2 border-gray-100 mb-3">
+                  <div key={member.name} className="flex flex-col items-center">
+                    <div className="w-32 h-32 sm:w-44 sm:h-44 rounded-xl overflow-hidden shadow-md border-2 border-gray-100 mb-3">
                       <img src={member.image} alt={member.name} className="w-full h-full object-cover object-top" />
                     </div>
-                    <h4 className="font-poppins text-sm font-medium text-slate text-center">{member.name}</h4>
+                    <h4 className="font-poppins text-xs sm:text-sm font-medium text-slate text-center">{member.name}</h4>
                   </div>
                 ))}
               </div>
