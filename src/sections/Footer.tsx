@@ -149,7 +149,10 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Sri Bhuvanendra Residential School. All Rights Reserved.
           </p>
           <p className="font-inter text-xs text-forest-light/60 text-center sm:text-right">
-            Maintained by Dept of Computer Science • Designed with care at SBRS
+            Designed & Developed by{' '}
+            <a href="https://agathidigital.com/" target="_blank" rel="noopener noreferrer" className="text-saffron hover:text-saffron-deep transition-colors underline underline-offset-2">
+              Agathi Digital Solutions
+            </a>
           </p>
         </div>
       </div>
