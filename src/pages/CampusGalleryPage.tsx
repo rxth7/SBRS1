@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback, memo } from 'react';
+import { useEffect, useState, useMemo, memo } from 'react';
 import { Link } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
 import { getCampusImages, type CampusImage } from '../lib/campusImagesStore';
@@ -98,6 +98,7 @@ const ImageCard = memo(function ImageCard({ img }: { img: ImageData }) {
         <img
           src={img.src}
           alt={img.alt}
+          loading="lazy"
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
         />
       </div>
@@ -110,9 +111,18 @@ const ImageCard = memo(function ImageCard({ img }: { img: ImageData }) {
   );
 });
 
+const StaticGrid = memo(function StaticGrid() {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      {staticImages.map((img) => (
+        <ImageCard key={img.src} img={img} />
+      ))}
+    </div>
+  );
+});
+
 export default function CampusGalleryPage() {
   const [adminImages, setAdminImages] = useState<CampusImage[]>([]);
-  const [showCount, setShowCount] = useState(20);
 
   useEffect(() => {
     getCampusImages().then((data) => {
@@ -120,17 +130,10 @@ export default function CampusGalleryPage() {
     });
   }, []);
 
-  const allImages: ImageData[] = useMemo(() => [
-    ...adminImages.map((img) => ({ src: img.src, alt: img.name, name: img.name })),
-    ...staticImages,
-  ], [adminImages]);
-
-  const visibleImages = allImages.slice(0, showCount);
-  const hasMore = showCount < allImages.length;
-
-  const handleLoadMore = useCallback(() => {
-    setShowCount((prev) => prev + 20);
-  }, []);
+  const adminImageCards = useMemo(() =>
+    adminImages.map((img) => ({ src: img.src, alt: img.name, name: img.name })),
+    [adminImages]
+  );
 
   return (
     <div className="min-h-screen bg-ivory">
@@ -173,19 +176,15 @@ export default function CampusGalleryPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {visibleImages.map((img) => (
-              <ImageCard key={img.src} img={img} />
-            ))}
-          </div>
-          {hasMore && (
-            <div className="text-center mt-8">
-              <button
-                onClick={handleLoadMore}
-                className="px-8 py-3 bg-saffron text-forest font-poppins font-semibold text-sm uppercase tracking-wider rounded-lg hover:bg-saffron-deep transition-colors"
-              >
-                Load More ({allImages.length - showCount} remaining)
-              </button>
+          {/* Static images — container never re-renders */}
+          <StaticGrid />
+
+          {/* Admin images — load separately without affecting static grid */}
+          {adminImageCards.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-4 sm:mt-6">
+              {adminImageCards.map((img) => (
+                <ImageCard key={img.src} img={img} />
+              ))}
             </div>
           )}
         </div>
