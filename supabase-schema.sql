@@ -183,6 +183,7 @@ CREATE POLICY "Allow delete on events" ON events FOR DELETE USING (true);
 CREATE POLICY "Allow insert on news" ON news FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow delete on news" ON news FOR DELETE USING (true);
 CREATE POLICY "Allow insert on event_images" ON event_images FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow update on event_images" ON event_images FOR UPDATE USING (true);
 CREATE POLICY "Allow delete on event_images" ON event_images FOR DELETE USING (true);
 CREATE POLICY "Allow insert on fee_structure" ON fee_structure FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow update on fee_structure" ON fee_structure FOR UPDATE USING (true);

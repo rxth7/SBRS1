@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { LogOut, Plus, Trash2, Edit3, Calendar, Newspaper, List, Image, Banknote, Users, FileText, Lock, Trophy } from 'lucide-react';
 import { getAdminEvents, addEvent, deleteEvent, type UpcomingEvent } from '../lib/eventsStore';
 import { getAdminNews, addNews, deleteNews, type NewsItem } from '../lib/newsStore';
-import { getAdminEventImages, addEventImage, deleteEventImage, type EventImage } from '../lib/eventImagesStore';
+import { getAdminEventImages, addEventImage, deleteEventImage, updateEventImage, type EventImage } from '../lib/eventImagesStore';
 import { getFeeItems, addFeeItem, updateFeeItem, deleteFeeItem, getFeeNotes, addFeeNote, updateFeeNote, deleteFeeNote, type FeeItem, type FeeNote } from '../lib/feeStore';
 import { getFaculty, addFaculty, updateFaculty, deleteFaculty, type FacultyMember } from '../lib/facultyStore';
 import { getAdminCampusImages, addCampusImage, deleteCampusImage, type CampusImage } from '../lib/campusImagesStore';
@@ -51,6 +51,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [imageUploading, setImageUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileSizeError, setFileSizeError] = useState('');
+  const [editingImageId, setEditingImageId] = useState<string | null>(null);
 
   const [feeParticular, setFeeParticular] = useState('');
   const [feLkg, setFeLkg] = useState('');
@@ -301,46 +302,108 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setImageError('');
     setFileSizeError('');
 
-    if (!selectedFile) {
-      setImageError('Please select an image file.');
-      return;
-    }
-
-    const file = selectedFile;
-    if (!file.type.startsWith('image/')) {
-      setImageError('Please select an image file.');
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      setImageError('Image size must be 2MB or less.');
+    if (!imageTitle.trim() || !imageDesc.trim() || !imageDate.trim()) {
+      setImageError('Title, date, and description are required.');
       return;
     }
 
     setImageUploading(true);
 
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      const result = ev.target?.result as string;
-      try {
-        const compressed = await compressImage(result, 1 * 1024 * 1024);
-        await addEventImage(compressed, imageTitle.trim(), imageDesc.trim(), imageDate.trim());
+    try {
+      if (editingImageId) {
+        let newSrc: string | undefined;
+        if (selectedFile) {
+          if (!selectedFile.type.startsWith('image/')) {
+            setImageError('Please select an image file.');
+            setImageUploading(false);
+            return;
+          }
+          if (selectedFile.size > 2 * 1024 * 1024) {
+            setImageError('Image size must be 2MB or less.');
+            setImageUploading(false);
+            return;
+          }
+          const reader = new FileReader();
+          newSrc = await new Promise<string>((resolve, reject) => {
+            reader.onload = async (ev) => {
+              try {
+                const result = ev.target?.result as string;
+                const compressed = await compressImage(result, 1 * 1024 * 1024);
+                const match = compressed.match(/^data:(image\/\w+);base64,/);
+                const mimeType = match ? match[1] : 'image/jpeg';
+                const extension = mimeType.split('/')[1].replace('jpeg', 'jpg').replace('svg+xml', 'svg');
+                const base64Data = compressed.replace(/^data:image\/\w+;base64,/, '');
+                const byteChars = atob(base64Data);
+                const byteArrays: number[] = [];
+                for (let i = 0; i < byteChars.length; i++) byteArrays.push(byteChars.charCodeAt(i));
+                const blob = new Blob([new Uint8Array(byteArrays)], { type: mimeType });
+                const fileName = `event-images/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+                const { error: uploadError } = await supabase.storage.from('event-images').upload(fileName, blob, { contentType: mimeType });
+                if (uploadError) throw new Error('Upload failed: ' + uploadError.message);
+                const { data: urlData } = supabase.storage.from('event-images').getPublicUrl(fileName);
+                resolve(urlData?.publicUrl || '');
+              } catch (err) {
+                reject(err);
+              }
+            };
+            reader.readAsDataURL(selectedFile);
+          });
+        }
+        await updateEventImage(editingImageId, {
+          title: imageTitle.trim(),
+          description: imageDesc.trim(),
+          date: imageDate.trim(),
+          ...(newSrc ? { src: newSrc } : {}),
+        });
         setEventImages(await getAdminEventImages());
-        setImageTitle('');
-        setImageDate('');
-        setImageDesc('');
+        setImageSuccess('Image updated!');
+      } else {
+        if (!selectedFile) {
+          setImageError('Please select an image file.');
+          setImageUploading(false);
+          return;
+        }
+        if (!selectedFile.type.startsWith('image/')) {
+          setImageError('Please select an image file.');
+          setImageUploading(false);
+          return;
+        }
+        if (selectedFile.size > 2 * 1024 * 1024) {
+          setImageError('Image size must be 2MB or less.');
+          setImageUploading(false);
+          return;
+        }
+        const reader = new FileReader();
+        await new Promise<void>((resolve, reject) => {
+          reader.onload = async (ev) => {
+            try {
+              const result = ev.target?.result as string;
+              const compressed = await compressImage(result, 1 * 1024 * 1024);
+              await addEventImage(compressed, imageTitle.trim(), imageDesc.trim(), imageDate.trim());
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          };
+          reader.readAsDataURL(selectedFile);
+        });
+        setEventImages(await getAdminEventImages());
         setImageSuccess('Image uploaded successfully!');
-        setTimeout(() => setImageSuccess(''), 3000);
-        setSelectedFile(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-      } catch (err) {
-        console.error('Upload error:', err);
-        const msg = err instanceof Error ? err.message : 'Failed to upload image.';
-        setImageError(msg);
-      } finally {
-        setImageUploading(false);
       }
-    };
-    reader.readAsDataURL(file);
+      setImageTitle('');
+      setImageDate('');
+      setImageDesc('');
+      setSelectedFile(null);
+      setEditingImageId(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      setTimeout(() => setImageSuccess(''), 3000);
+    } catch (err) {
+      console.error('Upload error:', err);
+      const msg = err instanceof Error ? err.message : 'Failed to save image.';
+      setImageError(msg);
+    } finally {
+      setImageUploading(false);
+    }
   };
 
   const handleDeleteEventImage = async (id: string) => {
@@ -350,6 +413,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     } catch (err) {
       console.error('Error deleting image:', err);
     }
+  };
+
+  const handleEditEventImage = (img: EventImage) => {
+    setEditingImageId(img.id);
+    setImageTitle(img.title);
+    setImageDate(img.date);
+    setImageDesc(img.description);
+    setSelectedFile(null);
+    setFileSizeError('');
+    setImageError('');
+    setActiveTab('add-event-images');
   };
 
   const handleFacultyFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1259,8 +1333,15 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 {activeTab === 'add-event-images' && (
                   <form onSubmit={handleFileUpload} className="space-y-5">
                     <h3 className="font-playfair text-xl text-forest font-bold flex items-center gap-2">
-                      <Image size={20} className="text-saffron" /> Add Event Images
+                      <Image size={20} className="text-saffron" /> {editingImageId ? 'Edit Event Image' : 'Add Event Images'}
                     </h3>
+
+                    {editingImageId && (
+                      <div className="flex items-center gap-2 bg-saffron/10 rounded-lg px-4 py-3">
+                        <span className="font-poppins text-sm text-forest flex-1">Editing: <strong>{imageTitle}</strong></span>
+                        <button type="button" onClick={() => { setEditingImageId(null); setImageTitle(''); setImageDate(''); setImageDesc(''); setSelectedFile(null); setImageError(''); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="font-poppins text-xs text-red-500 hover:text-red-600 font-medium uppercase tracking-wider">Cancel</button>
+                      </div>
+                    )}
 
                     <div>
                       <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Title</label>
@@ -1281,7 +1362,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                     <div>
                       <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Image</label>
                       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect}
-                        className="w-full px-4 py-3 rounded-lg bg-ivory border border-dashed border-forest/30 text-forest font-poppins text-sm focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-saffron file:text-forest file:font-poppins file:text-sm file:font-semibold file:uppercase file:tracking-wider file:cursor-pointer" required />
+                        className="w-full px-4 py-3 rounded-lg bg-ivory border border-dashed border-forest/30 text-forest font-poppins text-sm focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-saffron file:text-forest file:font-poppins file:text-sm file:font-semibold file:uppercase file:tracking-wider file:cursor-pointer" />
                       {selectedFile && !fileSizeError && (
                         <p className="font-poppins text-xs text-forest/50 mt-1">{selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)</p>
                       )}
@@ -1301,7 +1382,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                           Uploading...
                         </span>
                       ) : (
-                        'Upload Image'
+                        editingImageId ? 'Update Image' : 'Upload Image'
                       )}
                     </button>
 
@@ -1322,6 +1403,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                               <button onClick={() => handleDeleteEventImage(img.id)}
                                 className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600">
                                 <Trash2 size={14} />
+                              </button>
+                              <button onClick={() => handleEditEventImage(img)}
+                                className="absolute top-2 right-9 p-1.5 bg-saffron text-forest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-saffron-deep">
+                                <Edit3 size={14} />
                               </button>
                             </div>
                           ))}

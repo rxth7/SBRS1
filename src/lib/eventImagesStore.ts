@@ -103,3 +103,12 @@ export async function deleteEventImage(id: string): Promise<void> {
 
   eventImagesPromise = null;
 }
+
+export async function updateEventImage(
+  id: string,
+  partial: { title?: string; description?: string; date?: string; src?: string }
+): Promise<void> {
+  const { error } = await supabase.from('event_images').update(partial).eq('id', id);
+  if (error) throw error;
+  eventImagesPromise = null;
+}
