@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { LogOut, Plus, Trash2, Edit3, Calendar, Newspaper, List, Image, Banknote, Users, FileText, Lock } from 'lucide-react';
+import { LogOut, Plus, Trash2, Edit3, Calendar, Newspaper, List, Image, Banknote, Users, FileText, Lock, Trophy } from 'lucide-react';
 import { getAdminEvents, addEvent, deleteEvent, type UpcomingEvent } from '../lib/eventsStore';
 import { getAdminNews, addNews, deleteNews, type NewsItem } from '../lib/newsStore';
 import { getAdminEventImages, addEventImage, deleteEventImage, type EventImage } from '../lib/eventImagesStore';
@@ -9,6 +9,7 @@ import { getAdminCampusImages, addCampusImage, deleteCampusImage, type CampusIma
 import { getAdminAlumniMembers, addAlumniMember, updateAlumniMember, deleteAlumniMember, type AlumniMember } from '../lib/alumniMembersStore';
 import { getAdminAlumniMeetImages, addAlumniMeetImage, deleteAlumniMeetImage, type AlumniMeetImage } from '../lib/alumniMeetStore';
 import { getAdminSuccessStories, addSuccessStory, updateSuccessStory, deleteSuccessStory, type SuccessStory } from '../lib/successStoriesStore';
+import { getAdminAchievements, addAchievement, updateAchievement, deleteAchievement, type Achievement } from '../lib/achievementsStore';
 import { supabase } from '../lib/supabase';
 import DisclosureLinksAdmin from '../components/DisclosureLinksAdmin';
 
@@ -16,7 +17,7 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type SidebarTab = 'add-event' | 'view-events' | 'add-news' | 'view-news' | 'add-event-images' | 'add-campus-images' | 'fee-structure' | 'faculty' | 'alumni-associates' | 'alumni-meet' | 'success-stories' | 'disclosure-links' | 'change-password';
+type SidebarTab = 'add-event' | 'view-events' | 'add-news' | 'view-news' | 'add-event-images' | 'add-campus-images' | 'fee-structure' | 'faculty' | 'alumni-associates' | 'alumni-meet' | 'success-stories' | 'achievements' | 'disclosure-links' | 'change-password';
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<SidebarTab>('add-event');
@@ -126,6 +127,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [storyError, setStoryError] = useState('');
   const [storyUploading, setStoryUploading] = useState(false);
 
+  const [achievementsList, setAchievementsList] = useState<Achievement[]>([]);
+  const [editingAchievementId, setEditingAchievementId] = useState<string | null>(null);
+  const [achievementTitle, setAchievementTitle] = useState('');
+  const [achievementDesc, setAchievementDesc] = useState('');
+  const [achievementImageFile, setAchievementImageFile] = useState<File | null>(null);
+  const [achievementImagePreview, setAchievementImagePreview] = useState('');
+  const [achievementSuccess, setAchievementSuccess] = useState('');
+  const [achievementError, setAchievementError] = useState('');
+  const [achievementUploading, setAchievementUploading] = useState(false);
+  const achievementFileRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -133,7 +145,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [eventsData, newsData, imagesData, feeData, notesData, facultyData, campusData, alumniData, meetData, storiesData] = await Promise.all([
+      const [eventsData, newsData, imagesData, feeData, notesData, facultyData, campusData, alumniData, meetData, storiesData, achievementsData] = await Promise.all([
         getAdminEvents(),
         getAdminNews(),
         getAdminEventImages(),
@@ -144,6 +156,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         getAdminAlumniMembers(),
         getAdminAlumniMeetImages(),
         getAdminSuccessStories(),
+        getAdminAchievements(),
       ]);
       setEvents(eventsData);
       setNews(newsData);
@@ -155,6 +168,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       setAlumniMembers(alumniData);
       setMeetImages(meetData);
       setStories(storiesData);
+      setAchievementsList(achievementsData);
     } catch (err) {
       console.error('Error loading data:', err);
     } finally {
@@ -895,6 +909,108 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   };
 
+  const uploadAchievementImage = async (file: File): Promise<string> => {
+    const reader = new FileReader();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Image read failed'));
+      reader.readAsDataURL(file);
+    });
+    const compressed = await compressImage(dataUrl, 1 * 1024 * 1024);
+    const base64Data = compressed.replace(/^data:image\/\w+;base64,/, '');
+    const byteChars = atob(base64Data);
+    const byteArrays: number[] = [];
+    for (let i = 0; i < byteChars.length; i++) byteArrays.push(byteChars.charCodeAt(i));
+    const match = compressed.match(/^data:(image\/\w+);base64,/);
+    const mimeType = match ? match[1] : 'image/jpeg';
+    const extension = mimeType.split('/')[1].replace('jpeg', 'jpg').replace('svg+xml', 'svg');
+    const blob = new Blob([new Uint8Array(byteArrays)], { type: mimeType });
+    const fileName = `achievements-images/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+    const { error: uploadError } = await supabase.storage.from('achievements-images').upload(fileName, blob, { contentType: mimeType });
+    if (uploadError) throw new Error('Image upload failed: ' + uploadError.message);
+    const { data: urlData } = supabase.storage.from('achievements-images').getPublicUrl(fileName);
+    return urlData?.publicUrl || '';
+  };
+
+  const handleAchievementFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) { setAchievementImageFile(null); setAchievementImagePreview(''); return; }
+    const file = files[0];
+    if (!file.type.startsWith('image/')) { setAchievementImageFile(null); return; }
+    if (file.size > 2 * 1024 * 1024) {
+      setAchievementImageFile(null);
+      setAchievementImagePreview('');
+      setAchievementError('Image size must be 2MB or less.');
+      return;
+    }
+    setAchievementImageFile(file);
+    setAchievementError('');
+    setAchievementImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleAddAchievement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAchievementError('');
+    setAchievementUploading(true);
+    if (!achievementTitle.trim() || !achievementDesc.trim()) {
+      setAchievementUploading(false);
+      setAchievementError('Title and description are required.');
+      return;
+    }
+    try {
+      let imageUrl = achievementImagePreview;
+      if (achievementImageFile) {
+        imageUrl = await uploadAchievementImage(achievementImageFile);
+      }
+      if (editingAchievementId) {
+        await updateAchievement(editingAchievementId, {
+          title: achievementTitle.trim(),
+          description: achievementDesc.trim(),
+          image_url: imageUrl,
+        });
+      } else {
+        await addAchievement({
+          title: achievementTitle.trim(),
+          description: achievementDesc.trim(),
+          image_url: imageUrl,
+        });
+      }
+      setAchievementsList(await getAdminAchievements());
+      setAchievementTitle('');
+      setAchievementDesc('');
+      setAchievementImageFile(null);
+      setAchievementImagePreview('');
+      setEditingAchievementId(null);
+      setAchievementSuccess(editingAchievementId ? 'Achievement updated!' : 'Achievement added!');
+      setTimeout(() => setAchievementSuccess(''), 3000);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to save achievement.';
+      setAchievementError(msg);
+    } finally {
+      setAchievementUploading(false);
+    }
+  };
+
+  const handleEditAchievement = (item: Achievement) => {
+    setEditingAchievementId(item.id);
+    setAchievementTitle(item.title);
+    setAchievementDesc(item.description);
+    setAchievementImagePreview(item.image_url || '');
+    setAchievementImageFile(null);
+    setAchievementError('');
+    setActiveTab('achievements');
+  };
+
+  const handleDeleteAchievement = async (id: string) => {
+    try {
+      await deleteAchievement(id);
+      setAchievementsList(await getAdminAchievements());
+      if (editingAchievementId === id) setEditingAchievementId(null);
+    } catch (err) {
+      console.error('Error deleting achievement:', err);
+    }
+  };
+
   const sidebarItems = [
     { id: 'add-event' as SidebarTab, label: 'Add New Event', icon: Plus },
     { id: 'view-events' as SidebarTab, label: 'View Events', icon: List },
@@ -907,6 +1023,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     { id: 'alumni-associates' as SidebarTab, label: 'Alumni Associates', icon: Users },
     { id: 'alumni-meet' as SidebarTab, label: 'Alumni Meet', icon: Image },
     { id: 'success-stories' as SidebarTab, label: 'Success Stories', icon: Newspaper },
+    { id: 'achievements' as SidebarTab, label: 'Achievements', icon: Trophy },
     { id: 'disclosure-links' as SidebarTab, label: 'Disclosure Links', icon: FileText },
     { id: 'change-password' as SidebarTab, label: 'Change Password', icon: Lock },
   ];
@@ -1772,6 +1889,84 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   </div>
                 )}
                 {activeTab === 'disclosure-links' && <DisclosureLinksAdmin />}
+                {activeTab === 'achievements' && (
+                  <div className="space-y-8">
+                    <h3 className="font-playfair text-xl text-forest font-bold flex items-center gap-2">
+                      <Trophy size={20} className="text-saffron" /> {editingAchievementId ? 'Edit Achievement' : 'Add Achievement'}
+                    </h3>
+
+                    {editingAchievementId && (
+                      <div className="flex items-center gap-2 bg-saffron/10 rounded-lg px-4 py-3">
+                        <span className="font-poppins text-sm text-forest flex-1">Editing: <strong>{achievementTitle}</strong></span>
+                        <button type="button" onClick={() => { setEditingAchievementId(null); setAchievementTitle(''); setAchievementDesc(''); setAchievementImageFile(null); setAchievementImagePreview(''); setAchievementError(''); }} className="font-poppins text-xs text-red-500 hover:text-red-600 font-medium uppercase tracking-wider">Cancel</button>
+                      </div>
+                    )}
+
+                    <form onSubmit={handleAddAchievement} className="space-y-4">
+                      <div>
+                        <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Title</label>
+                        <input type="text" value={achievementTitle} onChange={(e) => setAchievementTitle(e.target.value)} placeholder="e.g. National-Level Excellence in Science"
+                          className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors" required />
+                      </div>
+                      <div>
+                        <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Description</label>
+                        <textarea value={achievementDesc} onChange={(e) => setAchievementDesc(e.target.value)} rows={4} placeholder="Describe the achievement..."
+                          className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors resize-none" required />
+                      </div>
+                      <div>
+                        <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Image</label>
+                        <input ref={achievementFileRef} type="file" accept="image/*" onChange={handleAchievementFileSelect} className="hidden" />
+                        <button type="button" onClick={() => achievementFileRef.current?.click()}
+                          className="w-full px-4 py-3 rounded-lg border border-dashed border-forest/20 text-forest/50 font-poppins text-sm hover:border-saffron hover:text-saffron transition-colors">
+                          {achievementImagePreview ? 'Change Image' : 'Choose Image (optional, max 2MB)'}
+                        </button>
+                        {achievementImagePreview && (
+                          <div className="mt-3 relative inline-block">
+                            <img src={achievementImagePreview} alt="Preview" className="h-24 rounded-lg object-cover" />
+                            <button type="button" onClick={() => { setAchievementImageFile(null); setAchievementImagePreview(''); if (achievementFileRef.current) achievementFileRef.current.value = ''; }}
+                              className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs">×</button>
+                          </div>
+                        )}
+                      </div>
+
+                      {achievementSuccess && <p className="font-poppins text-sm text-green-600 bg-green-50 rounded-lg py-2 px-4">{achievementSuccess}</p>}
+                      {achievementError && <p className="font-poppins text-sm text-red-500 bg-red-50 rounded-lg py-2 px-4">{achievementError}</p>}
+
+                      <button type="submit" disabled={achievementUploading} className="w-full py-3 bg-saffron text-forest font-poppins font-semibold text-sm uppercase tracking-wider rounded-lg hover:bg-saffron-deep transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {achievementUploading ? 'Saving...' : (editingAchievementId ? 'Update Achievement' : 'Add Achievement')}
+                      </button>
+                    </form>
+
+                    {achievementsList.length > 0 && (
+                      <div>
+                        <h4 className="font-poppins text-sm font-semibold text-forest mb-4">Achievements ({achievementsList.length})</h4>
+                        <div className="space-y-3">
+                          {achievementsList.map((item) => (
+                            <div key={item.id} className="flex items-start justify-between gap-4 p-4 bg-ivory rounded-xl border border-forest/10">
+                              <div className="min-w-0 flex items-start gap-3">
+                                {item.image_url && (
+                                  <img src={item.image_url} alt={item.title} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                                )}
+                                <div className="min-w-0">
+                                  <p className="font-poppins text-sm font-medium text-forest">{item.title}</p>
+                                  <p className="font-poppins text-xs text-forest/40 mt-1 line-clamp-2">{item.description}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <button onClick={() => handleDeleteAchievement(item.id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                  <Trash2 size={16} />
+                                </button>
+                                <button onClick={() => handleEditAchievement(item)} className="p-2 text-saffron hover:text-saffron-deep hover:bg-saffron/10 rounded-lg transition-colors">
+                                  <Edit3 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
                 {activeTab === 'change-password' && (
                   <div className="text-center py-16">
                     <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-saffron/10 flex items-center justify-center">

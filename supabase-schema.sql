@@ -377,3 +377,45 @@ CREATE POLICY "Allow public read on success_stories" ON success_stories FOR SELE
 CREATE POLICY "Allow insert on success_stories" ON success_stories FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow update on success_stories" ON success_stories FOR UPDATE USING (true);
 CREATE POLICY "Allow delete on success_stories" ON success_stories FOR DELETE USING (true);
+
+-- =====================
+-- ACHIEVEMENTS TABLE
+-- =====================
+CREATE TABLE IF NOT EXISTS achievements (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  image_url TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE achievements ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read on achievements" ON achievements;
+CREATE POLICY "Allow public read on achievements" ON achievements FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow insert on achievements" ON achievements;
+CREATE POLICY "Allow insert on achievements" ON achievements FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow update on achievements" ON achievements;
+CREATE POLICY "Allow update on achievements" ON achievements FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Allow delete on achievements" ON achievements;
+CREATE POLICY "Allow delete on achievements" ON achievements FOR DELETE USING (true);
+
+-- Create public bucket for achievements images (idempotent)
+INSERT INTO storage.buckets (id, name, public) VALUES ('achievements-images', 'achievements-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Achievements images public read" ON storage.objects;
+CREATE POLICY "Achievements images public read" ON storage.objects
+  FOR SELECT USING (bucket_id = 'achievements-images');
+
+DROP POLICY IF EXISTS "Achievements images write" ON storage.objects;
+CREATE POLICY "Achievements images write" ON storage.objects
+  FOR INSERT WITH CHECK (bucket_id = 'achievements-images');
+
+DROP POLICY IF EXISTS "Achievements images update" ON storage.objects;
+CREATE POLICY "Achievements images update" ON storage.objects
+  FOR UPDATE USING (bucket_id = 'achievements-images');
+
+DROP POLICY IF EXISTS "Achievements images delete" ON storage.objects;
+CREATE POLICY "Achievements images delete" ON storage.objects
+  FOR DELETE USING (bucket_id = 'achievements-images');

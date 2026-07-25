@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { ArrowLeft, Trophy, FlaskConical, Lightbulb, Palette, Medal, GraduationCap } from 'lucide-react';
+import { getAchievements, type Achievement } from '../lib/achievementsStore';
 
-const achievements = [
+const fallbackAchievements = [
   {
     icon: FlaskConical,
     title: 'National-Level Excellence in Science Competitions',
@@ -39,7 +41,17 @@ const achievements = [
   },
 ];
 
+const iconPool = [FlaskConical, Lightbulb, Palette, Medal, GraduationCap, Trophy];
+
 export default function Achievements() {
+  const [dbAchievements, setDbAchievements] = useState<Achievement[]>([]);
+
+  useEffect(() => {
+    getAchievements().then((data) => setDbAchievements(data)).catch(() => {});
+  }, []);
+
+  const hasDbAchievements = dbAchievements.length > 0;
+
   return (
     <div className="min-h-screen bg-ivory">
       {/* Header */}
@@ -88,7 +100,35 @@ export default function Achievements() {
       {/* Achievements List */}
       <section className="py-12 md:py-16">
         <div className="max-w-[1000px] mx-auto px-4 sm:px-6 space-y-6">
-          {achievements.map((item, i) => (
+          {hasDbAchievements && dbAchievements.map((item, i) => {
+            const Icon = iconPool[i % iconPool.length];
+            return (
+              <div
+                key={item.id}
+                className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300"
+              >
+                <div className="h-1.5 bg-gradient-to-r from-saffron to-burgundy" />
+                <div className={`p-6 md:p-8 flex items-start gap-5 ${item.image_url ? 'flex-col md:flex-row' : ''}`}>
+                  {item.image_url && (
+                    <div className="w-full md:w-80 flex-shrink-0 rounded-lg overflow-hidden">
+                      <img src={item.image_url} alt={item.title} className="w-full h-auto object-cover rounded-lg" />
+                    </div>
+                  )}
+                  <div className="flex items-start gap-5">
+                    <div className="w-12 h-12 bg-saffron/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-6 h-6 text-saffron" />
+                    </div>
+                    <div>
+                      <h2 className="font-playfair text-xl md:text-2xl text-slate mb-3">{item.title}</h2>
+                      <p className="font-poppins text-sm text-gray-600 leading-relaxed">{item.description}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {!hasDbAchievements && fallbackAchievements.map((item, i) => (
             <div
               key={i}
               className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300"
