@@ -108,7 +108,7 @@ export default function Navigation() {
           </a>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-5">
             {navLinks.map((link) =>
               link.hasDropdown ? (
                 <div
@@ -226,7 +226,7 @@ export default function Navigation() {
               e.preventDefault();
               scrollToSection('/admissions');
             }}
-            className="hidden lg:inline-flex items-center px-4 py-2 bg-saffron text-forest text-[10px] font-semibold uppercase tracking-[0.1em] rounded-lg hover:bg-saffron-deep transition-colors duration-300"
+            className="hidden lg:inline-flex items-center px-5 py-2.5 bg-saffron text-forest text-[11px] font-semibold uppercase tracking-[0.1em] rounded-lg hover:bg-saffron-deep transition-colors duration-300"
           >
             Apply Now
           </a>
