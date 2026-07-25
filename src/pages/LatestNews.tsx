@@ -70,11 +70,18 @@ export default function LatestNews() {
                 key={item.id}
                 className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300"
               >
+                {item.image_url && (
+                  <div className="aspect-video overflow-hidden">
+                    <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                  </div>
+                )}
                 <div className="h-1.5 bg-gradient-to-r from-saffron to-burgundy" />
                 <div className="p-6 md:p-8 flex items-start gap-5">
-                  <div className="w-12 h-12 bg-saffron/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Newspaper className="w-6 h-6 text-saffron" />
-                  </div>
+                  {!item.image_url && (
+                    <div className="w-12 h-12 bg-saffron/10 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Newspaper className="w-6 h-6 text-saffron" />
+                    </div>
+                  )}
                   <div>
                     {item.date && (
                       <span className="font-poppins text-xs font-semibold text-saffron uppercase tracking-wide">

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { LogOut, Plus, Trash2, Edit3, Calendar, Newspaper, List, Image, Banknote, Users, FileText, Lock, Trophy } from 'lucide-react';
 import { getAdminEvents, addEvent, deleteEvent, updateEvent, uploadEventImage, type UpcomingEvent } from '../lib/eventsStore';
-import { getAdminNews, addNews, deleteNews, type NewsItem } from '../lib/newsStore';
+import { getAdminNews, addNews, deleteNews, updateNews, uploadNewsImage, type NewsItem } from '../lib/newsStore';
 import { getAdminEventImages, addEventImage, deleteEventImage, updateEventImage, type EventImage } from '../lib/eventImagesStore';
 import { getFeeItems, addFeeItem, updateFeeItem, deleteFeeItem, getFeeNotes, addFeeNote, updateFeeNote, deleteFeeNote, type FeeItem, type FeeNote } from '../lib/feeStore';
 import { getFaculty, addFaculty, updateFaculty, deleteFaculty, type FacultyMember } from '../lib/facultyStore';
@@ -45,6 +45,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [newsSuccess, setNewsSuccess] = useState('');
   const [newsError, setNewsError] = useState('');
   const [newsUploading, setNewsUploading] = useState(false);
+  const [newsImageFile, setNewsImageFile] = useState<File | null>(null);
+  const [newsFileSizeError, setNewsFileSizeError] = useState('');
+  const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
 
   const [imageTitle, setImageTitle] = useState('');
   const [imageDate, setImageDate] = useState('');
@@ -212,11 +215,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     if (!newsTitle.trim() || !newsDesc.trim()) { setNewsUploading(false); return; }
 
     try {
-      await addNews({ title: newsTitle.trim(), date: newsDate.trim(), description: newsDesc.trim() });
+      await addNews({ title: newsTitle.trim(), date: newsDate.trim(), description: newsDesc.trim(), image_file: newsImageFile || undefined });
       setNews(await getAdminNews());
       setNewsTitle('');
       setNewsDate('');
       setNewsDesc('');
+      setNewsImageFile(null);
       setNewsSuccess('News added successfully!');
       setTimeout(() => setNewsSuccess(''), 3000);
       setActiveTab('view-news');
@@ -283,6 +287,47 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       setNews(await getAdminNews());
     } catch (err) {
       console.error('Error deleting news:', err);
+    }
+  };
+
+  const handleEditNews = (item: NewsItem) => {
+    setEditingNewsId(item.id);
+    setNewsTitle(item.title);
+    setNewsDate(item.date);
+    setNewsDesc(item.description);
+    setNewsImageFile(null);
+    setActiveTab('add-news');
+  };
+
+  const handleUpdateNews = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingNewsId) return;
+    setNewsError('');
+    setNewsUploading(true);
+
+    try {
+      const partial: { title: string; date: string; description: string; image_url?: string } = {
+        title: newsTitle.trim(),
+        date: newsDate.trim(),
+        description: newsDesc.trim(),
+      };
+      if (newsImageFile) {
+        partial.image_url = await uploadNewsImage(newsImageFile);
+      }
+      await updateNews(editingNewsId, partial);
+      setNews(await getAdminNews());
+      setNewsTitle('');
+      setNewsDate('');
+      setNewsDesc('');
+      setNewsImageFile(null);
+      setEditingNewsId(null);
+      setNewsSuccess('News updated successfully!');
+      setTimeout(() => setNewsSuccess(''), 3000);
+      setActiveTab('view-news');
+    } catch (err) {
+      setNewsError('Failed to update news.');
+    } finally {
+      setNewsUploading(false);
     }
   };
 
@@ -1339,8 +1384,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
                 {/* Add News */}
                 {activeTab === 'add-news' && (
-                  <form onSubmit={handleAddNews} className="space-y-5">
-                    <h3 className="font-playfair text-xl text-forest font-bold mb-6">Add New Latest News</h3>
+                  <form onSubmit={editingNewsId ? handleUpdateNews : handleAddNews} className="space-y-5">
+                    <h3 className="font-playfair text-xl text-forest font-bold mb-6">{editingNewsId ? 'Edit News' : 'Add New Latest News'}</h3>
                     <div>
                       <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">News Title</label>
                       <input type="text" value={newsTitle} onChange={(e) => setNewsTitle(e.target.value)} placeholder="e.g. World Environment Day"
@@ -1356,21 +1401,43 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       <textarea value={newsDesc} onChange={(e) => setNewsDesc(e.target.value)} rows={4} placeholder="Write a short description about the news..."
                         className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors resize-none" required />
                     </div>
+                    <div>
+                      <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">News Image <span className="text-forest/40">(optional)</span></label>
+                      <input type="file" accept="image/*" onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        if (file && file.size > 2 * 1024 * 1024) { setNewsFileSizeError('Max 2MB allowed'); setNewsImageFile(null); return; }
+                        setNewsFileSizeError('');
+                        setNewsImageFile(file);
+                      }} className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-saffron/20 file:text-saffron file:font-semibold file:text-xs hover:file:bg-saffron/30" />
+                      {newsFileSizeError && <p className="font-poppins text-xs text-red-500 mt-1">{newsFileSizeError}</p>}
+                      {newsImageFile && <p className="font-poppins text-xs text-forest/50 mt-1">{newsImageFile.name}</p>}
+                      {editingNewsId && !newsImageFile && (
+                        <p className="font-poppins text-xs text-forest/40 mt-1">Leave empty to keep current image</p>
+                      )}
+                    </div>
                     {newsSuccess && <p className="font-poppins text-sm text-green-600 bg-green-50 rounded-lg py-2 px-4">{newsSuccess}</p>}
                     {newsError && <p className="font-poppins text-sm text-red-500 bg-red-50 rounded-lg py-2 px-4">{newsError}</p>}
-                    <button type="submit" disabled={newsUploading} className="w-full py-3 bg-saffron text-forest font-poppins font-semibold text-sm uppercase tracking-wider rounded-lg hover:bg-saffron-deep transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                      {newsUploading ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                          </svg>
-                          Adding...
-                        </span>
-                      ) : (
-                        'Add News'
+                    <div className="flex gap-3">
+                      <button type="submit" disabled={newsUploading} className="flex-1 py-3 bg-saffron text-forest font-poppins font-semibold text-sm uppercase tracking-wider rounded-lg hover:bg-saffron-deep transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {newsUploading ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                            {editingNewsId ? 'Updating...' : 'Adding...'}
+                          </span>
+                        ) : (
+                          editingNewsId ? 'Update News' : 'Add News'
+                        )}
+                      </button>
+                      {editingNewsId && (
+                        <button type="button" onClick={() => { setEditingNewsId(null); setNewsTitle(''); setNewsDate(''); setNewsDesc(''); setNewsImageFile(null); }}
+                          className="px-6 py-3 bg-forest/10 text-forest font-poppins font-semibold text-sm uppercase tracking-wider rounded-lg hover:bg-forest/20 transition-all duration-300">
+                          Cancel
+                        </button>
                       )}
-                    </button>
+                    </div>
                   </form>
                 )}
 
@@ -1385,15 +1452,25 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                     ) : (
                       <div className="space-y-4">
                         {news.map((item) => (
-                          <div key={item.id} className="flex items-start justify-between gap-4 p-4 bg-ivory rounded-xl border border-forest/10">
+                          <div key={item.id} className="flex items-start gap-4 p-4 bg-ivory rounded-xl border border-forest/10">
+                            {item.image_url && (
+                              <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                              </div>
+                            )}
                             <div className="flex-1 min-w-0">
                               {item.date && <p className="font-poppins text-sm font-semibold text-saffron mb-1">{item.date}</p>}
                               <p className="font-poppins text-sm font-medium text-forest mb-1">{item.title}</p>
                               <p className="font-poppins text-xs text-forest/50 line-clamp-2">{item.description}</p>
                             </div>
-                            <button onClick={() => handleDeleteNews(item.id)} className="flex-shrink-0 p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                              <Trash2 size={16} />
-                            </button>
+                            <div className="flex gap-1 flex-shrink-0">
+                              <button onClick={() => handleEditNews(item)} className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                <Edit3 size={16} />
+                              </button>
+                              <button onClick={() => handleDeleteNews(item.id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
