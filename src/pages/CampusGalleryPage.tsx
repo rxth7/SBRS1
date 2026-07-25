@@ -70,7 +70,7 @@ const campusSpecialNames: Record<number, string> = {
   35: 'Felicitation of Former Principal',
   36: 'Felicitation of Former Principal',
   37: 'Felicitation of Former Principal',
-  40: 'Scouts and Guides',
+  40: 'Cubs and Bulbuls',
   42: 'Honouring Sunil Kumar',
   44: 'Field Trip',
 };
