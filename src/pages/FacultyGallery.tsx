@@ -111,7 +111,7 @@ export default function FacultyGallery() {
       {!loading && (
       <section className="pt-28 pb-12 bg-gradient-to-b from-slate to-forest/90">
         <div className="content-max-width page-padding flex flex-col items-center text-center">
-          <div className="w-40 h-40 sm:w-52 sm:h-52 rounded-full overflow-hidden border-4 border-saffron/60 shadow-lg mb-5">
+          <div className="w-40 h-40 sm:w-52 sm:h-52 rounded-2xl overflow-hidden border-4 border-saffron/60 shadow-lg mb-5">
             <img
               src={principal?.image || '/images/principal-portrait.webp'}
               alt="Principal"
