@@ -66,7 +66,7 @@ export default function CampusGallery() {
           {displayImages.map((img, i) => (
             <div
               key={i}
-              className="rounded-xl overflow-hidden bg-forest/20 aspect-[4/3] cursor-pointer hover:opacity-90 transition-opacity"
+              className={`rounded-xl overflow-hidden bg-forest/20 aspect-[4/3] cursor-pointer hover:opacity-90 transition-opacity ${i === 5 ? 'lg:hidden' : ''}`}
               onClick={() => setLightbox({ src: loaded && blobs[i] ? blobs[i] : img.src, alt: img.alt })}
             >
               <img
