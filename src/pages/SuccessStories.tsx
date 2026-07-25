@@ -76,7 +76,7 @@ export default function SuccessStories() {
                       {item.batch && <p className="font-poppins text-sm text-saffron font-medium">{item.batch}</p>}
                     </div>
                   </div>
-                  <p className="font-poppins text-sm text-gray-600 leading-relaxed whitespace-pre-line">{item.story}</p>
+                  <p className="font-poppins text-sm text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: item.story }} />
                 </div>
               </div>
             ))

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { LogOut, Plus, Trash2, Edit3, Calendar, Newspaper, List, Image, Banknote, Users, FileText, Lock, Trophy, Star } from 'lucide-react';
+import RichTextEditor from '../components/RichTextEditor';
 import { getAdminEvents, addEvent, deleteEvent, updateEvent, uploadEventImage, type UpcomingEvent } from '../lib/eventsStore';
 import { getAdminNews, addNews, deleteNews, updateNews, uploadNewsImage, type NewsItem } from '../lib/newsStore';
 import { getAdminEventImages, addEventImage, deleteEventImage, updateEventImage, type EventImage } from '../lib/eventImagesStore';
@@ -1026,7 +1027,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     e.preventDefault();
     setStoryError('');
     setStoryUploading(true);
-    if (!storyName.trim() || !storyText.trim()) { setStoryUploading(false); setStoryError('Name and story are required.'); return; }
+    if (!storyName.trim() || !storyText.replace(/<[^>]*>/g, '').trim()) { setStoryUploading(false); setStoryError('Name and story are required.'); return; }
 
     try {
       if (editingStoryId) {
@@ -2094,8 +2095,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       </div>
                       <div>
                         <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Story</label>
-                        <textarea value={storyText} onChange={(e) => setStoryText(e.target.value)} rows={6} placeholder="Write the success story here..."
-                          className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors resize-none" required />
+                        <RichTextEditor value={storyText} onChange={setStoryText} placeholder="Write the success story here..." />
                       </div>
                       <div>
                         <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Profile Photo <span className="text-forest/40">(optional)</span></label>
