@@ -173,7 +173,7 @@ export default function CampusGalleryPage() {
         </div>
       </section>
       {lightbox && (
-        <ImageLightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />
+        <ImageLightbox src={lightbox.src} alt={lightbox.alt} title={lightbox.name} onClose={() => setLightbox(null)} />
       )}
     </div>
   );

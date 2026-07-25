@@ -3,10 +3,11 @@ import { useEffect, useCallback, useState } from 'react';
 interface ImageLightboxProps {
   src: string;
   alt: string;
+  title?: string;
   onClose: () => void;
 }
 
-export default function ImageLightbox({ src, alt, onClose }: ImageLightboxProps) {
+export default function ImageLightbox({ src, alt, title, onClose }: ImageLightboxProps) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') onClose();
@@ -43,8 +44,8 @@ export default function ImageLightbox({ src, alt, onClose }: ImageLightboxProps)
           onLoad={() => setImgLoaded(true)}
           className={`max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
-        {alt && (
-          <p className="mt-3 text-center text-white/80 text-sm font-poppins">{alt}</p>
+        {(title || alt) && (
+          <p className="mt-3 text-center text-white/80 text-sm font-poppins">{title || alt}</p>
         )}
       </div>
     </div>
