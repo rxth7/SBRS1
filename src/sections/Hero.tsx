@@ -74,7 +74,7 @@ export default function Hero() {
     return () => ctx.revert();
   }, []);
 
-  const mottoText = 'बुद्धिर्ज्ञानेनशुद्ध्यति- Wisdom is purified through knowledge • ';
+  const mottoText = 'बुद्धिर्ज्ञानेन शुद्ध्यति - Wisdom is purified through knowledge • ';
   const characters = mottoText.split('');
 
   return (
@@ -121,7 +121,7 @@ export default function Hero() {
               "Where Excellence Begins and Future Leaders Are Nurtured."
             </p>
             <p className="font-poppins text-xs md:text-sm text-ivory/70 mt-4 font-bold" style={{ textShadow: '0 2px 15px rgba(0,0,0,0.4)' }}>
-               बुद्धिर्ज्ञानेनशुद्ध्यति  •  Wisdom is purified through knowledge
+               बुद्धिर्ज्ञानेन शुद्ध्यति  •  Wisdom is purified through knowledge
             </p>
             <p className="font-inter text-[10px] md:text-xs uppercase tracking-[0.2em] text-saffron/80 mt-2 font-semibold hidden md:block" style={{ textShadow: '0 2px 15px rgba(0,0,0,0.4)' }}>
               Affiliated to CBSE
