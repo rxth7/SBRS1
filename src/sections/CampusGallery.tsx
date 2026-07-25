@@ -13,6 +13,7 @@ const displayImages: ImageData[] = [
   { src: '/images/campus20.webp', alt: 'Independence Day Celebration' },
   { src: '/images/campus33.webp', alt: 'A Moment of Honor and Celebration' },
   { src: '/images/campus31.webp', alt: 'Alumini Day Celebration' },
+  { src: '/images/campus26.webp', alt: 'Tarang 25 Inauguration' },
 ];
 
 export default function CampusGallery() {
