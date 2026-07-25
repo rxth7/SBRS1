@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { LogOut, Plus, Trash2, Edit3, Calendar, Newspaper, List, Image, Banknote, Users, FileText, Lock, Trophy } from 'lucide-react';
-import { getAdminEvents, addEvent, deleteEvent, type UpcomingEvent } from '../lib/eventsStore';
+import { getAdminEvents, addEvent, deleteEvent, updateEvent, uploadEventImage, type UpcomingEvent } from '../lib/eventsStore';
 import { getAdminNews, addNews, deleteNews, type NewsItem } from '../lib/newsStore';
 import { getAdminEventImages, addEventImage, deleteEventImage, updateEventImage, type EventImage } from '../lib/eventImagesStore';
 import { getFeeItems, addFeeItem, updateFeeItem, deleteFeeItem, getFeeNotes, addFeeNote, updateFeeNote, deleteFeeNote, type FeeItem, type FeeNote } from '../lib/feeStore';
@@ -35,6 +35,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [eventSuccess, setEventSuccess] = useState('');
   const [eventError, setEventError] = useState('');
   const [eventUploading, setEventUploading] = useState(false);
+  const [eventImageFile, setEventImageFile] = useState<File | null>(null);
+  const [eventFileSizeError, setEventFileSizeError] = useState('');
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
 
   const [newsTitle, setNewsTitle] = useState('');
   const [newsDate, setNewsDate] = useState('');
@@ -186,11 +189,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     if (!eventTitle.trim() || !eventDate.trim() || !eventDesc.trim()) { setEventUploading(false); return; }
 
     try {
-      await addEvent({ title: eventTitle.trim(), date: eventDate.trim(), description: eventDesc.trim() });
+      await addEvent({ title: eventTitle.trim(), date: eventDate.trim(), description: eventDesc.trim(), image_file: eventImageFile || undefined });
       setEvents(await getAdminEvents());
       setEventTitle('');
       setEventDate('');
       setEventDesc('');
+      setEventImageFile(null);
       setEventSuccess('Event added successfully!');
       setTimeout(() => setEventSuccess(''), 3000);
       setActiveTab('view-events');
@@ -229,6 +233,47 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       setEvents(await getAdminEvents());
     } catch (err) {
       console.error('Error deleting event:', err);
+    }
+  };
+
+  const handleEditEvent = (event: UpcomingEvent) => {
+    setEditingEventId(event.id);
+    setEventTitle(event.title);
+    setEventDate(event.date);
+    setEventDesc(event.description);
+    setEventImageFile(null);
+    setActiveTab('add-event');
+  };
+
+  const handleUpdateEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEventId) return;
+    setEventError('');
+    setEventUploading(true);
+
+    try {
+      const partial: { title: string; date: string; description: string; image_url?: string } = {
+        title: eventTitle.trim(),
+        date: eventDate.trim(),
+        description: eventDesc.trim(),
+      };
+      if (eventImageFile) {
+        partial.image_url = await uploadEventImage(eventImageFile);
+      }
+      await updateEvent(editingEventId, partial);
+      setEvents(await getAdminEvents());
+      setEventTitle('');
+      setEventDate('');
+      setEventDesc('');
+      setEventImageFile(null);
+      setEditingEventId(null);
+      setEventSuccess('Event updated successfully!');
+      setTimeout(() => setEventSuccess(''), 3000);
+      setActiveTab('view-events');
+    } catch (err) {
+      setEventError('Failed to update event.');
+    } finally {
+      setEventUploading(false);
     }
   };
 
@@ -1198,8 +1243,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <>
                 {/* Add Event */}
                 {activeTab === 'add-event' && (
-                  <form onSubmit={handleAddEvent} className="space-y-5">
-                    <h3 className="font-playfair text-xl text-forest font-bold mb-6">Add New Upcoming Event</h3>
+                  <form onSubmit={editingEventId ? handleUpdateEvent : handleAddEvent} className="space-y-5">
+                    <h3 className="font-playfair text-xl text-forest font-bold mb-6">{editingEventId ? 'Edit Event' : 'Add New Upcoming Event'}</h3>
                     <div>
                       <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Event Title</label>
                       <input type="text" value={eventTitle} onChange={(e) => setEventTitle(e.target.value)} placeholder="e.g. Annual Day Celebration"
@@ -1215,21 +1260,43 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       <textarea value={eventDesc} onChange={(e) => setEventDesc(e.target.value)} rows={4} placeholder="Write a short description about the event..."
                         className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors resize-none" required />
                     </div>
+                    <div>
+                      <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Event Image <span className="text-forest/40">(optional)</span></label>
+                      <input type="file" accept="image/*" onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        if (file && file.size > 2 * 1024 * 1024) { setEventFileSizeError('Max 2MB allowed'); setEventImageFile(null); return; }
+                        setEventFileSizeError('');
+                        setEventImageFile(file);
+                      }} className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-saffron/20 file:text-saffron file:font-semibold file:text-xs hover:file:bg-saffron/30" />
+                      {eventFileSizeError && <p className="font-poppins text-xs text-red-500 mt-1">{eventFileSizeError}</p>}
+                      {eventImageFile && <p className="font-poppins text-xs text-forest/50 mt-1">{eventImageFile.name}</p>}
+                      {editingEventId && !eventImageFile && (
+                        <p className="font-poppins text-xs text-forest/40 mt-1">Leave empty to keep current image</p>
+                      )}
+                    </div>
                     {eventSuccess && <p className="font-poppins text-sm text-green-600 bg-green-50 rounded-lg py-2 px-4">{eventSuccess}</p>}
                     {eventError && <p className="font-poppins text-sm text-red-500 bg-red-50 rounded-lg py-2 px-4">{eventError}</p>}
-                    <button type="submit" disabled={eventUploading} className="w-full py-3 bg-saffron text-forest font-poppins font-semibold text-sm uppercase tracking-wider rounded-lg hover:bg-saffron-deep transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                      {eventUploading ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                          </svg>
-                          Adding...
-                        </span>
-                      ) : (
-                        'Add Event'
+                    <div className="flex gap-3">
+                      <button type="submit" disabled={eventUploading} className="flex-1 py-3 bg-saffron text-forest font-poppins font-semibold text-sm uppercase tracking-wider rounded-lg hover:bg-saffron-deep transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {eventUploading ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                            {editingEventId ? 'Updating...' : 'Adding...'}
+                          </span>
+                        ) : (
+                          editingEventId ? 'Update Event' : 'Add Event'
+                        )}
+                      </button>
+                      {editingEventId && (
+                        <button type="button" onClick={() => { setEditingEventId(null); setEventTitle(''); setEventDate(''); setEventDesc(''); setEventImageFile(null); }}
+                          className="px-6 py-3 bg-forest/10 text-forest font-poppins font-semibold text-sm uppercase tracking-wider rounded-lg hover:bg-forest/20 transition-all duration-300">
+                          Cancel
+                        </button>
                       )}
-                    </button>
+                    </div>
                   </form>
                 )}
 
@@ -1244,15 +1311,25 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                     ) : (
                       <div className="space-y-4">
                         {events.map((event) => (
-                          <div key={event.id} className="flex items-start justify-between gap-4 p-4 bg-ivory rounded-xl border border-forest/10">
+                          <div key={event.id} className="flex items-start gap-4 p-4 bg-ivory rounded-xl border border-forest/10">
+                            {event.image_url && (
+                              <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
+                                <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
+                              </div>
+                            )}
                             <div className="flex-1 min-w-0">
                               <p className="font-poppins text-sm font-semibold text-saffron mb-1">{event.date}</p>
                               <p className="font-poppins text-sm font-medium text-forest mb-1">{event.title}</p>
                               <p className="font-poppins text-xs text-forest/50 line-clamp-2">{event.description}</p>
                             </div>
-                            <button onClick={() => handleDeleteEvent(event.id)} className="flex-shrink-0 p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                              <Trash2 size={16} />
-                            </button>
+                            <div className="flex gap-1 flex-shrink-0">
+                              <button onClick={() => handleEditEvent(event)} className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                <Edit3 size={16} />
+                              </button>
+                              <button onClick={() => handleDeleteEvent(event.id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>

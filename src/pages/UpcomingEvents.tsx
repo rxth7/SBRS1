@@ -71,6 +71,16 @@ export default function UpcomingEvents() {
                 key={event.id}
                 className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300"
               >
+                {event.image_url && (
+                  <div className="aspect-video overflow-hidden">
+                    <img
+                      src={event.image_url}
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
                 <div className="h-1.5 bg-gradient-to-r from-saffron to-burgundy" />
 
                 <div className="p-6 md:p-8">
