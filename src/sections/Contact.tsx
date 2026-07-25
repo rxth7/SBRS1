@@ -19,6 +19,12 @@ const contactInfo = [
     href: 'tel:+919844548735',
   },
   {
+    icon: Phone,
+    label: 'Phone',
+    value: '+91 81974 21795',
+    href: 'tel:+918197421795',
+  },
+  {
     icon: Mail,
     label: 'Email',
     value: 'sbrs2002@gmail.com',
