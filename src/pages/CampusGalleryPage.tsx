@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
 import ImageLightbox from '../components/ImageLightbox';
@@ -95,6 +95,7 @@ const staticImages: ImageData[] = [...galleryImages, ...campusImages];
 export default function CampusGalleryPage() {
   const [lightbox, setLightbox] = useState<ImageData | null>(null);
   const [adminImages, setAdminImages] = useState<CampusImage[]>([]);
+  const [showCount, setShowCount] = useState(20);
 
   useEffect(() => {
     getCampusImages().then((data) => {
@@ -102,10 +103,13 @@ export default function CampusGalleryPage() {
     });
   }, []);
 
-  const allImages: ImageData[] = [
+  const allImages: ImageData[] = useMemo(() => [
     ...adminImages.map((img) => ({ src: img.src, alt: img.name, name: img.name })),
     ...staticImages,
-  ];
+  ], [adminImages]);
+
+  const visibleImages = allImages.slice(0, showCount);
+  const hasMore = showCount < allImages.length;
 
   return (
     <div className="min-h-screen bg-ivory">
@@ -149,7 +153,7 @@ export default function CampusGalleryPage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {allImages.map((img, i) => (
+            {visibleImages.map((img, i) => (
               <div
                 key={i < adminImages.length ? `admin-${i}` : `static-${i}`}
                 className="rounded-xl overflow-hidden bg-forest/10 border border-forest/10 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col"
@@ -159,6 +163,8 @@ export default function CampusGalleryPage() {
                   <img
                     src={img.src}
                     alt={img.alt}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   />
                 </div>
@@ -170,6 +176,16 @@ export default function CampusGalleryPage() {
               </div>
             ))}
           </div>
+          {hasMore && (
+            <div className="text-center mt-8">
+              <button
+                onClick={() => setShowCount((prev) => prev + 20)}
+                className="px-8 py-3 bg-saffron text-forest font-poppins font-semibold text-sm uppercase tracking-wider rounded-lg hover:bg-saffron-deep transition-colors"
+              >
+                Load More ({allImages.length - showCount} remaining)
+              </button>
+            </div>
+          )}
         </div>
       </section>
       {lightbox && (
