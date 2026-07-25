@@ -111,17 +111,17 @@ export default function FacultyGallery() {
       {!loading && (
       <section className="pt-28 pb-12 bg-gradient-to-b from-slate to-forest/90">
         <div className="content-max-width page-padding flex flex-col items-center text-center">
-          <div className="w-40 h-40 sm:w-52 sm:h-52 rounded-2xl overflow-hidden border-4 border-saffron/60 shadow-lg mb-5">
+          <div className="w-52 h-52 sm:w-72 sm:h-72 lg:w-80 lg:h-80 rounded-2xl overflow-hidden border-4 border-saffron/60 shadow-lg mb-5">
             <img
               src={principal?.image || '/images/principal-portrait.webp'}
               alt="Principal"
               className="w-full h-full object-cover object-top scale-125"
             />
           </div>
-          <h2 className="font-playfair text-[clamp(1.8rem,4vw,3rem)] text-ivory leading-tight mb-2">
+          <h2 className="font-playfair text-lg sm:text-xl text-ivory leading-tight mb-1">
             Principal
           </h2>
-          <p className="text-saffron font-poppins text-xl font-semibold">
+          <p className="text-saffron font-poppins text-sm sm:text-base font-semibold">
             {principal?.name || 'Mrs. B. Veena Shenoy, M.Sc., B.Ed.'}
           </p>
         </div>
