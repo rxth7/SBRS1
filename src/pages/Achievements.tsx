@@ -50,8 +50,6 @@ export default function Achievements() {
     getAchievements().then((data) => setDbAchievements(data)).catch(() => {});
   }, []);
 
-  const hasDbAchievements = dbAchievements.length > 0;
-
   return (
     <div className="min-h-screen bg-ivory">
       {/* Header */}
@@ -100,7 +98,8 @@ export default function Achievements() {
       {/* Achievements List */}
       <section className="py-12 md:py-16">
         <div className="max-w-[1000px] mx-auto px-4 sm:px-6 space-y-6">
-          {hasDbAchievements && dbAchievements.map((item, i) => {
+          {/* DB Achievements first */}
+          {dbAchievements.map((item, i) => {
             const Icon = iconPool[i % iconPool.length];
             return (
               <div
@@ -136,7 +135,8 @@ export default function Achievements() {
             );
           })}
 
-          {!hasDbAchievements && fallbackAchievements.map((item, i) => (
+          {/* Fallback achievements always shown */}
+          {fallbackAchievements.map((item, i) => (
             <div
               key={i}
               className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300"
