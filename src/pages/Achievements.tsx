@@ -110,8 +110,16 @@ export default function Achievements() {
                 <div className="h-1.5 bg-gradient-to-r from-saffron to-burgundy" />
                 <div className={`p-6 md:p-8 flex items-start gap-5 ${item.image_url ? 'flex-col md:flex-row' : ''}`}>
                   {item.image_url && (
-                    <div className="w-full md:w-80 flex-shrink-0 rounded-lg overflow-hidden">
-                      <img src={item.image_url} alt={item.title} className="w-full h-auto object-cover rounded-lg" />
+                    <div className="w-full md:w-80 flex-shrink-0 rounded-lg overflow-hidden bg-saffron/5 aspect-video flex items-center justify-center relative group">
+                      <img
+                        src={item.image_url}
+                        alt={item.title}
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <Trophy className="w-10 h-10 text-saffron/30" />
+                      </div>
                     </div>
                   )}
                   <div className="flex items-start gap-5">
@@ -136,8 +144,16 @@ export default function Achievements() {
               <div className="h-1.5 bg-gradient-to-r from-saffron to-burgundy" />
               <div className={`p-6 md:p-8 flex items-start gap-5 ${item.image ? 'flex-col md:flex-row' : ''}`}>
                 {item.image && (
-                  <div className="w-full md:w-80 flex-shrink-0 rounded-lg overflow-hidden">
-                    <img src={item.image} alt={item.title} className="w-full h-auto object-cover rounded-lg" />
+                  <div className="w-full md:w-80 flex-shrink-0 rounded-lg overflow-hidden bg-saffron/5 aspect-video flex items-center justify-center relative">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <item.icon className="w-10 h-10 text-saffron/30" />
+                    </div>
                   </div>
                 )}
                 <div className="flex items-start gap-5">
