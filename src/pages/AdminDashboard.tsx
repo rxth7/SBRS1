@@ -145,7 +145,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [eventsData, newsData, imagesData, feeData, notesData, facultyData, campusData, alumniData, meetData, storiesData, achievementsData] = await Promise.all([
+      const [eventsData, newsData, imagesData, feeData, notesData, facultyData, campusData, alumniData, meetData, storiesData] = await Promise.all([
         getAdminEvents(),
         getAdminNews(),
         getAdminEventImages(),
@@ -156,7 +156,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         getAdminAlumniMembers(),
         getAdminAlumniMeetImages(),
         getAdminSuccessStories(),
-        getAdminAchievements(),
       ]);
       setEvents(eventsData);
       setNews(newsData);
@@ -168,7 +167,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       setAlumniMembers(alumniData);
       setMeetImages(meetData);
       setStories(storiesData);
-      setAchievementsList(achievementsData);
+      try {
+        const achievementsData = await getAdminAchievements();
+        setAchievementsList(achievementsData);
+      } catch { /* achievements table may not exist yet */ }
     } catch (err) {
       console.error('Error loading data:', err);
     } finally {
