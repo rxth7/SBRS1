@@ -74,7 +74,7 @@ export default function AlumniAssociation() {
         <div className="max-w-[1000px] mx-auto space-y-12">
 
           {/* Non-Executive Members (with designations) */}
-          <div className="grid grid-cols-2 lg:grid-cols-2 gap-8 lg:gap-12 justify-items-center">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 justify-items-center">
             {displayNonExecutive.map((member) => (
               <div key={member.name} className="flex flex-col items-center">
                 <div className="w-40 h-40 sm:w-60 sm:h-60 rounded-xl overflow-hidden shadow-lg border-4 border-saffron/20 mb-4">
