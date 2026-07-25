@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { Bold, Italic } from 'lucide-react';
 
 interface RichTextEditorProps {
@@ -10,6 +10,14 @@ interface RichTextEditorProps {
 
 export default function RichTextEditor({ value, onChange, placeholder, className = '' }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
+  const lastSetValue = useRef(value);
+
+  useEffect(() => {
+    if (editorRef.current && value !== lastSetValue.current) {
+      editorRef.current.innerHTML = value;
+      lastSetValue.current = value;
+    }
+  }, [value]);
 
   const handleCommand = (command: string) => {
     document.execCommand(command, false);
@@ -38,9 +46,12 @@ export default function RichTextEditor({ value, onChange, placeholder, className
         contentEditable
         suppressContentEditableWarning
         onInput={() => {
-          if (editorRef.current) onChange(editorRef.current.innerHTML);
+          if (editorRef.current) {
+            const html = editorRef.current.innerHTML;
+            lastSetValue.current = html;
+            onChange(html);
+          }
         }}
-        dangerouslySetInnerHTML={{ __html: value }}
         data-placeholder={placeholder}
         className="w-full px-4 py-3 bg-ivory text-forest font-poppins text-sm min-h-[80px] focus:outline-none empty:before:content-[attr(data-placeholder)] empty:before:text-forest/30 [&_b]:font-bold [&_i]:italic"
         style={{ lineHeight: '1.6' }}
