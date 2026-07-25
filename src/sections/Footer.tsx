@@ -157,6 +157,9 @@ export default function Footer() {
           <span style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
             Website designed and developed by Agathi Digital Solutions - https://agathidigital.com/
           </span>
+          <span style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+            Designed and developed by Pixova Studio - https://www.pixova.co4.in
+          </span>
         </div>
       </div>
     </footer>
