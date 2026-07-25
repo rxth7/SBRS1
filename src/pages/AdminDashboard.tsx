@@ -1395,11 +1395,11 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                                 <p className="font-poppins text-xs text-saffron font-semibold">{img.date}</p>
                                 <p className="font-poppins text-sm text-forest font-medium truncate">{img.title}</p>
                               </div>
-                              <button onClick={() => handleDeleteEventImage(img.id)}
+                              <button type="button" onClick={() => handleDeleteEventImage(img.id)}
                                 className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600">
                                 <Trash2 size={14} />
                               </button>
-                              <button onClick={() => handleEditEventImage(img)}
+                              <button type="button" onClick={() => handleEditEventImage(img)}
                                 className="absolute top-2 right-9 p-1.5 bg-saffron text-forest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-saffron-deep">
                                 <Edit3 size={14} />
                               </button>
