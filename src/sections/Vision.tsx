@@ -70,11 +70,11 @@ export default function Vision() {
               Our Vision
             </span>
             <h2 className="section-title mb-6">
-              From Darkness<br />
-              <span className="text-saffron">to Light</span>
+              Wisdom is purified<br />
+              <span className="text-saffron">through knowledge</span>
             </h2>
             <p className="font-inter text-lg leading-relaxed text-forest-light mb-6">
-              Guided by the motto <span className="font-playfair italic text-saffron">'तमसोमा ज्योतिर्गमय'</span> (From Darkness to Light),
+              Guided by the motto <span className="font-playfair italic text-saffron">'बुद्धिर्ज्ञानेन शुद्ध्यति'</span> (Wisdom is purified through knowledge),
               we illuminate young minds with knowledge, wisdom, and values. Our mission is to create
               responsible global citizens who carry the torch of enlightenment to every corner of society.
             </p>
@@ -87,10 +87,10 @@ export default function Vision() {
             {/* Sanskrit motto display */}
             <div className="mt-8 p-6 bg-slate rounded-lg">
               <p className="font-playfair text-2xl text-saffron text-center leading-relaxed">
-                तमसोमा ज्योतिर्गमय ॥
+                बुद्धिर्ज्ञानेन शुद्ध्यति
               </p>
               <p className="font-inter text-sm text-ivory/70 text-center mt-2">
-                From Darkness, Lead us to Light
+                Wisdom is purified through knowledge
               </p>
             </div>
           </div>

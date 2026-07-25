@@ -96,7 +96,7 @@ export default function PrincipalMessage() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-10 items-center">
           {/* Left - Portrait */}
           <div ref={imageRef} className="relative">
-            <div className="relative mx-auto lg:mx-0 lg:ml-8 w-[280px] h-[380px] lg:w-[480px] lg:h-[500px] overflow-hidden" style={{ borderRadius: '50% 50% 8px 8px' }}>
+            <div className="relative mx-auto lg:mx-0 lg:ml-8 w-[280px] h-[380px] lg:w-[480px] lg:h-[500px] overflow-hidden rounded-2xl">
               <img
                 src={principalPhoto}
                 alt="Principal of SBRS"
