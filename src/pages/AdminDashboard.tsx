@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { LogOut, Plus, Trash2, Edit3, Calendar, Newspaper, List, Image, Banknote, Users, FileText, Lock, Trophy } from 'lucide-react';
+import { LogOut, Plus, Trash2, Edit3, Calendar, Newspaper, List, Image, Banknote, Users, FileText, Lock, Trophy, Star } from 'lucide-react';
 import { getAdminEvents, addEvent, deleteEvent, updateEvent, uploadEventImage, type UpcomingEvent } from '../lib/eventsStore';
 import { getAdminNews, addNews, deleteNews, updateNews, uploadNewsImage, type NewsItem } from '../lib/newsStore';
 import { getAdminEventImages, addEventImage, deleteEventImage, updateEventImage, type EventImage } from '../lib/eventImagesStore';
@@ -8,7 +8,7 @@ import { getFaculty, addFaculty, updateFaculty, deleteFaculty, type FacultyMembe
 import { getAdminCampusImages, addCampusImage, deleteCampusImage, type CampusImage } from '../lib/campusImagesStore';
 import { getAdminAlumniMembers, addAlumniMember, updateAlumniMember, deleteAlumniMember, type AlumniMember } from '../lib/alumniMembersStore';
 import { getAdminAlumniMeetImages, addAlumniMeetImage, deleteAlumniMeetImage, type AlumniMeetImage } from '../lib/alumniMeetStore';
-import { getAdminSuccessStories, addSuccessStory, updateSuccessStory, deleteSuccessStory, type SuccessStory } from '../lib/successStoriesStore';
+import { getAdminSuccessStories, addSuccessStory, updateSuccessStory, deleteSuccessStory, uploadStoryImage, type SuccessStory } from '../lib/successStoriesStore';
 import { getAdminAchievements, addAchievement, updateAchievement, deleteAchievement, type Achievement } from '../lib/achievementsStore';
 import { supabase } from '../lib/supabase';
 import DisclosureLinksAdmin from '../components/DisclosureLinksAdmin';
@@ -133,6 +133,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [storySuccess, setStorySuccess] = useState('');
   const [storyError, setStoryError] = useState('');
   const [storyUploading, setStoryUploading] = useState(false);
+  const [storyImageFile, setStoryImageFile] = useState<File | null>(null);
+  const [storyFileSizeError, setStoryFileSizeError] = useState('');
 
   const [achievementsList, setAchievementsList] = useState<Achievement[]>([]);
   const [editingAchievementId, setEditingAchievementId] = useState<string | null>(null);
@@ -1028,18 +1030,23 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
     try {
       if (editingStoryId) {
-        await updateSuccessStory(editingStoryId, {
+        const partial: { name: string; batch: string; story: string; image_url?: string } = {
           name: storyName.trim(),
           batch: storyBatch.trim(),
           story: storyText.trim(),
-        });
+        };
+        if (storyImageFile) {
+          partial.image_url = await uploadStoryImage(storyImageFile);
+        }
+        await updateSuccessStory(editingStoryId, partial);
       } else {
-        await addSuccessStory({ name: storyName.trim(), batch: storyBatch.trim(), story: storyText.trim() });
+        await addSuccessStory({ name: storyName.trim(), batch: storyBatch.trim(), story: storyText.trim(), image_file: storyImageFile || undefined });
       }
       setStories(await getAdminSuccessStories());
       setStoryName('');
       setStoryBatch('');
       setStoryText('');
+      setStoryImageFile(null);
       setEditingStoryId(null);
       setStorySuccess(editingStoryId ? 'Success story updated!' : 'Success story added!');
       setTimeout(() => setStorySuccess(''), 3000);
@@ -1056,6 +1063,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setStoryName(item.name);
     setStoryBatch(item.batch);
     setStoryText(item.story);
+    setStoryImageFile(null);
     setStoryError('');
     setActiveTab('success-stories');
   };
@@ -2069,7 +2077,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                      {editingStoryId && (
                        <div className="flex items-center gap-2 bg-saffron/10 rounded-lg px-4 py-3">
                          <span className="font-poppins text-sm text-forest flex-1">Editing: <strong>{storyName}</strong></span>
-                         <button type="button" onClick={() => { setEditingStoryId(null); setStoryName(''); setStoryBatch(''); setStoryText(''); setStoryError(''); }} className="font-poppins text-xs text-red-500 hover:text-red-600 font-medium uppercase tracking-wider">Cancel</button>
+                         <button type="button" onClick={() => { setEditingStoryId(null); setStoryName(''); setStoryBatch(''); setStoryText(''); setStoryImageFile(null); setStoryError(''); }} className="font-poppins text-xs text-red-500 hover:text-red-600 font-medium uppercase tracking-wider">Cancel</button>
                        </div>
                      )}
 
@@ -2089,6 +2097,20 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                         <textarea value={storyText} onChange={(e) => setStoryText(e.target.value)} rows={6} placeholder="Write the success story here..."
                           className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors resize-none" required />
                       </div>
+                      <div>
+                        <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Profile Photo <span className="text-forest/40">(optional)</span></label>
+                        <input type="file" accept="image/*" onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          if (file && file.size > 2 * 1024 * 1024) { setStoryFileSizeError('Max 2MB allowed'); setStoryImageFile(null); return; }
+                          setStoryFileSizeError('');
+                          setStoryImageFile(file);
+                        }} className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-saffron/20 file:text-saffron file:font-semibold file:text-xs hover:file:bg-saffron/30" />
+                        {storyFileSizeError && <p className="font-poppins text-xs text-red-500 mt-1">{storyFileSizeError}</p>}
+                        {storyImageFile && <p className="font-poppins text-xs text-forest/50 mt-1">{storyImageFile.name}</p>}
+                        {editingStoryId && !storyImageFile && (
+                          <p className="font-poppins text-xs text-forest/40 mt-1">Leave empty to keep current photo</p>
+                        )}
+                      </div>
 
                       {storySuccess && <p className="font-poppins text-sm text-green-600 bg-green-50 rounded-lg py-2 px-4">{storySuccess}</p>}
                       {storyError && <p className="font-poppins text-sm text-red-500 bg-red-50 rounded-lg py-2 px-4">{storyError}</p>}
@@ -2103,8 +2125,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                         <h4 className="font-poppins text-sm font-semibold text-forest mb-4">Success Stories ({stories.length})</h4>
                         <div className="space-y-3">
                           {stories.map((item) => (
-                            <div key={item.id} className="flex items-start justify-between gap-4 p-4 bg-ivory rounded-xl border border-forest/10">
-                              <div className="min-w-0">
+                            <div key={item.id} className="flex items-start gap-3 p-4 bg-ivory rounded-xl border border-forest/10">
+                              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-saffron/10">
+                                {item.image_url ? (
+                                  <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Star size={14} className="text-saffron" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
                                 <p className="font-poppins text-sm font-medium text-forest">{item.name}</p>
                                 {item.batch && <p className="font-poppins text-xs text-forest/50">{item.batch}</p>}
                                 <p className="font-poppins text-xs text-forest/40 mt-1 line-clamp-2">{item.story}</p>

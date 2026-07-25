@@ -5,6 +5,7 @@ export interface SuccessStory {
   name: string;
   batch: string;
   story: string;
+  image_url?: string;
   created_at?: string;
 }
 
@@ -33,14 +34,37 @@ export async function getAdminSuccessStories(): Promise<SuccessStory[]> {
   return fetchStories();
 }
 
-export async function addSuccessStory(story: Omit<SuccessStory, 'id' | 'created_at'>): Promise<void> {
-  const { error } = await supabase.from('success_stories').insert(story);
+export async function uploadStoryImage(file: File): Promise<string> {
+  const ext = file.name.split('.').pop() || 'jpg';
+  const fileName = `success-stories/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('alumni-images')
+    .upload(fileName, file, { contentType: file.type });
+  if (uploadError) throw new Error('Storage upload failed: ' + uploadError.message);
+
+  const { data: urlData } = supabase.storage.from('alumni-images').getPublicUrl(fileName);
+  return urlData?.publicUrl || '';
+}
+
+export async function addSuccessStory(story: { name: string; batch: string; story: string; image_file?: File }): Promise<void> {
+  let image_url = '';
+  if (story.image_file) {
+    image_url = await uploadStoryImage(story.image_file);
+  }
+
+  const { error } = await supabase.from('success_stories').insert({
+    name: story.name,
+    batch: story.batch,
+    story: story.story,
+    image_url,
+  });
   if (error) throw error;
   cache = null;
 }
 
-export async function updateSuccessStory(id: string, story: Partial<Omit<SuccessStory, 'id' | 'created_at'>>): Promise<void> {
-  const { error } = await supabase.from('success_stories').update(story).eq('id', id);
+export async function updateSuccessStory(id: string, partial: { name?: string; batch?: string; story?: string; image_url?: string }): Promise<void> {
+  const { error } = await supabase.from('success_stories').update(partial).eq('id', id);
   if (error) throw error;
   cache = null;
 }

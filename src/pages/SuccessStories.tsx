@@ -61,9 +61,15 @@ export default function SuccessStories() {
               <div key={item.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
                 <div className="h-1.5 bg-gradient-to-r from-saffron to-burgundy" />
                 <div className="p-6 md:p-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-saffron/10 rounded-full flex items-center justify-center">
-                      <Star className="w-6 h-6 text-saffron" />
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 bg-saffron/10 border-2 border-saffron/30">
+                      {item.image_url ? (
+                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Star className="w-7 h-7 text-saffron" />
+                        </div>
+                      )}
                     </div>
                     <div>
                       <h2 className="font-playfair text-xl md:text-2xl text-slate">{item.name}</h2>
