@@ -94,11 +94,13 @@ const staticImages: ImageData[] = [...galleryImages, ...campusImages];
 const ImageCard = memo(function ImageCard({ img }: { img: ImageData }) {
   return (
     <div className="rounded-xl overflow-hidden bg-forest/10 border border-forest/10 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col">
-      <div className={`${img.name ? 'aspect-[4/3]' : 'flex-1'} overflow-hidden`}>
+      <div className="aspect-[4/3] overflow-hidden bg-forest/5">
         <img
           src={img.src}
           alt={img.alt}
-          loading="lazy"
+          width="400"
+          height="300"
+          decoding="async"
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
         />
       </div>
