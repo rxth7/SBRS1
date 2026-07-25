@@ -102,22 +102,22 @@ export default function Hero() {
           <p className="font-poppins text-xs uppercase tracking-[0.15em] text-saffron mb-2">
             WELCOME TO
           </p>
-          <h1 className="font-playfair font-bold text-[clamp(2.5rem,9vw,8rem)] leading-[0.9] tracking-[-0.03em] text-ivory/80" style={{ textShadow: '0 4px 30px rgba(0,0,0,0.6)' }}>
+          <h1 className="font-playfair font-bold text-[clamp(2.5rem,8vw,7rem)] leading-[0.9] tracking-[-0.03em] text-ivory/80" style={{ textShadow: '0 4px 30px rgba(0,0,0,0.6)' }}>
             Sri Bhuvanendra
           </h1>
           <span className="sr-only">best school in karkala, boarding school in karkala, residential school in karkala, SBRS Karkala, top CBSE school in Udupi district, Karnataka residential school, hostel school in karkala, school admission in karkala</span>
         </div>
-        <div ref={subtitleRef} className="text-center mt-4 opacity-0">
-          <p className="font-playfair font-bold text-[clamp(1.2rem,3vw,2.5rem)] text-saffron" style={{ textShadow: '0 2px 15px rgba(0,0,0,0.4)' }}>
+        <div ref={subtitleRef} className="text-center mt-2 opacity-0">
+          <p className="font-playfair font-bold text-[clamp(1.8rem,5vw,4rem)] leading-[1] tracking-[-0.02em] text-ivory/80" style={{ textShadow: '0 2px 15px rgba(0,0,0,0.4)' }}>
             Residential School
           </p>
-          <p className="font-inter text-xs uppercase tracking-[0.2em] text-ivory mt-4 hidden md:block">
+          <p className="font-inter text-xs uppercase tracking-[0.2em] text-ivory mt-3 hidden md:block">
             Est. 2001 • Karkala, Karnataka
           </p>
           <p className="font-poppins text-xs md:text-sm text-saffron/90 font-bold mt-1 italic" style={{ textShadow: '0 2px 15px rgba(0,0,0,0.4)' }}>
               "Where Excellence Begins and Future Leaders Are Nurtured."
             </p>
-            <p className="font-poppins text-xs md:text-sm text-ivory/70 mt-4 font-bold" style={{ textShadow: '0 2px 15px rgba(0,0,0,0.4)' }}>
+            <p className="font-poppins text-xs md:text-sm text-ivory/70 mt-3 font-bold" style={{ textShadow: '0 2px 15px rgba(0,0,0,0.4)' }}>
                बुद्धिर्ज्ञानेन शुद्ध्यति  •  Wisdom is purified through knowledge
             </p>
             <p className="font-inter text-[10px] md:text-xs uppercase tracking-[0.2em] text-saffron/80 mt-2 font-semibold hidden md:block" style={{ textShadow: '0 2px 15px rgba(0,0,0,0.4)' }}>
