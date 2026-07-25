@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { LogOut, Plus, Trash2, Edit3, Calendar, Newspaper, List, Image, Banknote, Users, FileText, Lock, Trophy, Star } from 'lucide-react';
+import { LogOut, Plus, Trash2, Edit3, Calendar, Newspaper, List, Image, Banknote, Users, FileText, Lock, Trophy, Star, CheckCircle } from 'lucide-react';
 import RichTextEditor from '../components/RichTextEditor';
 import { getAdminEvents, addEvent, deleteEvent, updateEvent, uploadEventImage, type UpcomingEvent } from '../lib/eventsStore';
+import { getAdminConcludedEvents, addConcludedEvent, deleteConcludedEvent, updateConcludedEvent, uploadConcludedEventImage, type ConcludedEvent } from '../lib/concludedEventsStore';
 import { getAdminNews, addNews, deleteNews, updateNews, uploadNewsImage, type NewsItem } from '../lib/newsStore';
 import { getAdminEventImages, addEventImage, deleteEventImage, updateEventImage, type EventImage } from '../lib/eventImagesStore';
 import { getFeeItems, addFeeItem, updateFeeItem, deleteFeeItem, getFeeNotes, addFeeNote, updateFeeNote, deleteFeeNote, type FeeItem, type FeeNote } from '../lib/feeStore';
@@ -18,7 +19,7 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type SidebarTab = 'add-event' | 'view-events' | 'add-news' | 'view-news' | 'add-event-images' | 'add-campus-images' | 'fee-structure' | 'faculty' | 'alumni-associates' | 'alumni-meet' | 'success-stories' | 'achievements' | 'disclosure-links' | 'change-password';
+type SidebarTab = 'add-event' | 'view-events' | 'add-concluded-event' | 'add-news' | 'view-news' | 'add-event-images' | 'add-campus-images' | 'fee-structure' | 'faculty' | 'alumni-associates' | 'alumni-meet' | 'success-stories' | 'achievements' | 'disclosure-links' | 'change-password';
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<SidebarTab>('add-event');
@@ -39,6 +40,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [eventImageFile, setEventImageFile] = useState<File | null>(null);
   const [eventFileSizeError, setEventFileSizeError] = useState('');
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
+
+  const [concludedEvents, setConcludedEvents] = useState<ConcludedEvent[]>([]);
+  const [concludedTitle, setConcludedTitle] = useState('');
+  const [concludedDate, setConcludedDate] = useState('');
+  const [concludedDesc, setConcludedDesc] = useState('');
+  const [concludedSuccess, setConcludedSuccess] = useState('');
+  const [concludedError, setConcludedError] = useState('');
+  const [concludedUploading, setConcludedUploading] = useState(false);
+  const [concludedImageFile, setConcludedImageFile] = useState<File | null>(null);
+  const [concludedFileSizeError, setConcludedFileSizeError] = useState('');
+  const [editingConcludedId, setEditingConcludedId] = useState<string | null>(null);
 
   const [newsTitle, setNewsTitle] = useState('');
   const [newsDate, setNewsDate] = useState('');
@@ -155,8 +167,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [eventsData, newsData, imagesData, feeData, notesData, facultyData, campusData, alumniData, meetData, storiesData] = await Promise.all([
+      const [eventsData, concludedData, newsData, imagesData, feeData, notesData, facultyData, campusData, alumniData, meetData, storiesData] = await Promise.all([
         getAdminEvents(),
+        getAdminConcludedEvents(),
         getAdminNews(),
         getAdminEventImages(),
         getFeeItems(),
@@ -168,6 +181,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         getAdminSuccessStories(),
       ]);
       setEvents(eventsData);
+      setConcludedEvents(concludedData);
       setNews(newsData);
       setEventImages(imagesData);
       setFeeItems(feeData);
@@ -240,6 +254,61 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       setEvents(await getAdminEvents());
     } catch (err) {
       console.error('Error deleting event:', err);
+    }
+  };
+
+  const handleAddConcluded = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setConcludedError('');
+    setConcludedUploading(true);
+    if (!concludedTitle.trim() || !concludedDate.trim() || !concludedDesc.trim()) { setConcludedUploading(false); return; }
+
+    try {
+      if (editingConcludedId) {
+        const partial: { title: string; date: string; description: string; image_url?: string } = {
+          title: concludedTitle.trim(),
+          date: concludedDate.trim(),
+          description: concludedDesc.trim(),
+        };
+        if (concludedImageFile) {
+          partial.image_url = await uploadConcludedEventImage(concludedImageFile);
+        }
+        await updateConcludedEvent(editingConcludedId, partial);
+      } else {
+        await addConcludedEvent({ title: concludedTitle.trim(), date: concludedDate.trim(), description: concludedDesc.trim(), image_file: concludedImageFile || undefined });
+      }
+      setConcludedEvents(await getAdminConcludedEvents());
+      setConcludedTitle('');
+      setConcludedDate('');
+      setConcludedDesc('');
+      setConcludedImageFile(null);
+      setEditingConcludedId(null);
+      setConcludedSuccess(editingConcludedId ? 'Concluded event updated!' : 'Concluded event added!');
+      setTimeout(() => setConcludedSuccess(''), 3000);
+      setActiveTab('add-concluded-event');
+    } catch (err) {
+      setConcludedError('Failed to save concluded event.');
+    } finally {
+      setConcludedUploading(false);
+    }
+  };
+
+  const handleEditConcluded = (item: ConcludedEvent) => {
+    setEditingConcludedId(item.id);
+    setConcludedTitle(item.title);
+    setConcludedDate(item.date);
+    setConcludedDesc(item.description);
+    setConcludedImageFile(null);
+    setActiveTab('add-concluded-event');
+  };
+
+  const handleDeleteConcluded = async (id: string) => {
+    try {
+      await deleteConcludedEvent(id);
+      setConcludedEvents(await getAdminConcludedEvents());
+      if (editingConcludedId === id) setEditingConcludedId(null);
+    } catch (err) {
+      console.error('Error deleting concluded event:', err);
     }
   };
 
@@ -1184,6 +1253,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const sidebarItems = [
     { id: 'add-event' as SidebarTab, label: 'Add New Event', icon: Plus },
     { id: 'view-events' as SidebarTab, label: 'View Events', icon: List },
+    { id: 'add-concluded-event' as SidebarTab, label: 'Concluded Events', icon: CheckCircle },
     { id: 'add-news' as SidebarTab, label: 'Add Latest News', icon: Newspaper },
     { id: 'view-news' as SidebarTab, label: 'View News', icon: List },
     { id: 'add-event-images' as SidebarTab, label: 'Add Event Images', icon: Image },
@@ -1386,6 +1456,97 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                             </div>
                           </div>
                         ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Concluded Events */}
+                {activeTab === 'add-concluded-event' && (
+                  <div className="space-y-8">
+                    <h3 className="font-playfair text-xl text-forest font-bold flex items-center gap-2">
+                      <CheckCircle size={20} className="text-saffron" /> {editingConcludedId ? 'Edit Concluded Event' : 'Add Concluded Event'}
+                    </h3>
+
+                    {editingConcludedId && (
+                      <div className="flex items-center gap-2 bg-saffron/10 rounded-lg px-4 py-3">
+                        <span className="font-poppins text-sm text-forest flex-1">Editing: <strong>{concludedTitle}</strong></span>
+                        <button type="button" onClick={() => { setEditingConcludedId(null); setConcludedTitle(''); setConcludedDate(''); setConcludedDesc(''); setConcludedImageFile(null); setConcludedError(''); }} className="font-poppins text-xs text-red-500 hover:text-red-600 font-medium uppercase tracking-wider">Cancel</button>
+                      </div>
+                    )}
+
+                    <form onSubmit={handleAddConcluded} className="space-y-4">
+                      <div>
+                        <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Event Title</label>
+                        <input type="text" value={concludedTitle} onChange={(e) => setConcludedTitle(e.target.value)} placeholder="e.g. Annual Day Celebration"
+                          className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors" required />
+                      </div>
+                      <div>
+                        <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Event Date</label>
+                        <input type="text" value={concludedDate} onChange={(e) => setConcludedDate(e.target.value)} placeholder="e.g. 15 August 2025"
+                          className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors" required />
+                      </div>
+                      <div>
+                        <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Description</label>
+                        <textarea value={concludedDesc} onChange={(e) => setConcludedDesc(e.target.value)} rows={4} placeholder="Write a short description about the event..."
+                          className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm placeholder-forest/30 focus:outline-none focus:border-saffron focus:ring-1 focus:ring-saffron transition-colors resize-none" required />
+                      </div>
+                      <div>
+                        <label className="font-poppins text-xs font-medium text-forest/70 uppercase tracking-wider block mb-2">Event Image <span className="text-forest/40">(optional)</span></label>
+                        <input type="file" accept="image/*" onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          if (file && file.size > 2 * 1024 * 1024) { setConcludedFileSizeError('Max 2MB allowed'); setConcludedImageFile(null); return; }
+                          setConcludedFileSizeError('');
+                          setConcludedImageFile(file);
+                        }} className="w-full px-4 py-3 rounded-lg bg-ivory border border-forest/15 text-forest font-poppins text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-saffron/20 file:text-saffron file:font-semibold file:text-xs hover:file:bg-saffron/30" />
+                        {concludedFileSizeError && <p className="font-poppins text-xs text-red-500 mt-1">{concludedFileSizeError}</p>}
+                        {concludedImageFile && <p className="font-poppins text-xs text-forest/50 mt-1">{concludedImageFile.name}</p>}
+                        {editingConcludedId && !concludedImageFile && (
+                          <p className="font-poppins text-xs text-forest/40 mt-1">Leave empty to keep current image</p>
+                        )}
+                      </div>
+                      {concludedSuccess && <p className="font-poppins text-sm text-green-600 bg-green-50 rounded-lg py-2 px-4">{concludedSuccess}</p>}
+                      {concludedError && <p className="font-poppins text-sm text-red-500 bg-red-50 rounded-lg py-2 px-4">{concludedError}</p>}
+                      <div className="flex gap-3">
+                        <button type="submit" disabled={concludedUploading} className="flex-1 py-3 bg-saffron text-forest font-poppins font-semibold text-sm uppercase tracking-wider rounded-lg hover:bg-saffron-deep transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                          {concludedUploading ? 'Saving...' : (editingConcludedId ? 'Update Event' : 'Add Event')}
+                        </button>
+                        {editingConcludedId && (
+                          <button type="button" onClick={() => { setEditingConcludedId(null); setConcludedTitle(''); setConcludedDate(''); setConcludedDesc(''); setConcludedImageFile(null); }}
+                            className="px-6 py-3 bg-forest/10 text-forest font-poppins font-semibold text-sm uppercase tracking-wider rounded-lg hover:bg-forest/20 transition-all duration-300">
+                            Cancel
+                          </button>
+                        )}
+                      </div>
+                    </form>
+
+                    {concludedEvents.length > 0 && (
+                      <div>
+                        <h4 className="font-poppins text-sm font-semibold text-forest mb-4">Concluded Events ({concludedEvents.length})</h4>
+                        <div className="space-y-3">
+                          {concludedEvents.map((item) => (
+                            <div key={item.id} className="flex items-start gap-3 p-4 bg-ivory rounded-xl border border-forest/10">
+                              {item.image_url && (
+                                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                                  <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-poppins text-sm font-semibold text-saffron mb-1">{item.date}</p>
+                                <p className="font-poppins text-sm font-medium text-forest mb-1">{item.title}</p>
+                                <p className="font-poppins text-xs text-forest/50 line-clamp-2">{item.description}</p>
+                              </div>
+                              <div className="flex gap-1 flex-shrink-0">
+                                <button onClick={() => handleEditConcluded(item)} className="p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                  <Edit3 size={16} />
+                                </button>
+                                <button onClick={() => handleDeleteConcluded(item.id)} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>

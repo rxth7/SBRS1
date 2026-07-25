@@ -15,7 +15,7 @@ const navLinks = [
   { label: 'Gallery', href: '/gallery' },
   { label: 'Admissions', href: '/admissions', hasDropdown: true, dropdownItems: [{ label: 'View Fee Structure', href: '/fee-structure' }] },
   { label: 'Alumni', href: '/alumni', hasDropdown: true, dropdownItems: [{ label: 'Alumni Association', href: '/alumni-association' }, { label: 'Alumni Meet', href: '/alumni-meet' }, { label: 'Success Stories', href: '/success-stories' }] },
-  { label: 'Events', href: '/events', hasDropdown: true, dropdownItems: [{ label: 'Upcoming Events', href: '/upcoming-events' }, { label: 'Latest News', href: '/latest-news' }] },
+  { label: 'Events', href: '/events', hasDropdown: true, dropdownItems: [{ label: 'Upcoming Events', href: '/upcoming-events' }, { label: 'Concluded Events', href: '/concluded-events' }, { label: 'Latest News', href: '/latest-news' }] },
   { label: 'Contact', href: '/contact', hasDropdown: true, dropdownItems: [{ label: 'Feedback', href: '/feedback' }] },
 ];
 

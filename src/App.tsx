@@ -22,6 +22,7 @@ import EducationalPrograms from './pages/EducationalPrograms';
 import Achievements from './pages/Achievements';
 import Feedback from './pages/Feedback';
 import UpcomingEvents from './pages/UpcomingEvents';
+import ConcludedEvents from './pages/ConcludedEvents';
 import FeeStructure from './pages/FeeStructure';
 import AboutSchool from './pages/AboutSchool';
 import LatestNews from './pages/LatestNews';
@@ -176,6 +177,7 @@ function App() {
       <Route path="/achievements" element={<Achievements />} />
       <Route path="/feedback" element={<Feedback />} />
       <Route path="/upcoming-events" element={<UpcomingEvents />} />
+      <Route path="/concluded-events" element={<ConcludedEvents />} />
       <Route path="/fee-structure" element={<FeeStructure />} />
       <Route path="/about-school" element={<AboutSchool />} />
       <Route path="/latest-news" element={<LatestNews />} />
