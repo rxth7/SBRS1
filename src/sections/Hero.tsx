@@ -131,7 +131,7 @@ export default function Hero() {
           {/* Orbital Motto Spinner */}
           <div
             ref={spinnerRef}
-            className="hidden sm:block mt-6 mx-auto w-[100px] h-[100px] sm:w-[140px] sm:h-[140px] opacity-0"
+            className="hidden sm:block mt-6 mx-auto w-[120px] h-[120px] sm:w-[160px] sm:h-[160px] opacity-0"
           >
             <div className="relative w-full h-full animate-spin-slow">
               {characters.map((char, index) => {
@@ -139,11 +139,11 @@ export default function Hero() {
                 return (
                   <span
                     key={index}
-                    className="absolute left-1/2 top-0 font-inter text-[9px] sm:text-[11px] uppercase tracking-[0.12em] text-ivory font-medium"
+                    className="absolute left-1/2 top-0 font-poppins text-[9px] sm:text-[11px] text-ivory font-medium"
                     style={{
                       transform: `rotate(${angle}deg)`,
-                      transformOrigin: '0 70px',
-                      height: '70px',
+                      transformOrigin: '0 80px',
+                      height: '80px',
                     }}
                   >
                     {char}
