@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { Link } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
 import ImageLightbox from '../components/ImageLightbox';
@@ -92,6 +92,28 @@ interface ImageData {
 
 const staticImages: ImageData[] = [...galleryImages, ...campusImages];
 
+const ImageCard = memo(function ImageCard({ img, onClick }: { img: ImageData; onClick: () => void }) {
+  return (
+    <div
+      className="rounded-xl overflow-hidden bg-forest/10 border border-forest/10 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col"
+      onClick={onClick}
+    >
+      <div className={`${img.name ? 'aspect-[4/3]' : 'flex-1'} overflow-hidden`}>
+        <img
+          src={img.src}
+          alt={img.alt}
+          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+        />
+      </div>
+      {img.name && (
+        <p className="text-center text-forest/80 font-poppins text-xs sm:text-sm py-2 px-1 truncate">
+          {img.name}
+        </p>
+      )}
+    </div>
+  );
+});
+
 export default function CampusGalleryPage() {
   const [lightbox, setLightbox] = useState<ImageData | null>(null);
   const [adminImages, setAdminImages] = useState<CampusImage[]>([]);
@@ -110,6 +132,10 @@ export default function CampusGalleryPage() {
 
   const visibleImages = allImages.slice(0, showCount);
   const hasMore = showCount < allImages.length;
+
+  const handleLoadMore = useCallback(() => {
+    setShowCount((prev) => prev + 20);
+  }, []);
 
   return (
     <div className="min-h-screen bg-ivory">
@@ -154,30 +180,13 @@ export default function CampusGalleryPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {visibleImages.map((img) => (
-              <div
-                key={img.src}
-                className="rounded-xl overflow-hidden bg-forest/10 border border-forest/10 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col"
-                onClick={() => setLightbox(img)}
-              >
-                <div className={`${img.name ? 'aspect-[4/3]' : 'flex-1'} overflow-hidden`}>
-                  <img
-                    src={img.src}
-                    alt={img.alt}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                {img.name && (
-                  <p className="text-center text-forest/80 font-poppins text-xs sm:text-sm py-2 px-1 truncate">
-                    {img.name}
-                  </p>
-                )}
-              </div>
+              <ImageCard key={img.src} img={img} onClick={() => setLightbox(img)} />
             ))}
           </div>
           {hasMore && (
             <div className="text-center mt-8">
               <button
-                onClick={() => setShowCount((prev) => prev + 20)}
+                onClick={handleLoadMore}
                 className="px-8 py-3 bg-saffron text-forest font-poppins font-semibold text-sm uppercase tracking-wider rounded-lg hover:bg-saffron-deep transition-colors"
               >
                 Load More ({allImages.length - showCount} remaining)
