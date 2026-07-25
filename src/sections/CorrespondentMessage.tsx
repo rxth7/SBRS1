@@ -107,7 +107,7 @@ export default function CorrespondentMessage() {
 
           {/* Right - Portrait */}
           <div ref={imageRef} className="relative">
-            <div className="relative mx-auto lg:mx-0 lg:mr-8 w-[280px] h-[380px] lg:w-[480px] lg:h-[500px] overflow-hidden rounded-2xl">
+            <div className="relative mx-auto lg:ml-auto lg:mr-8 w-[280px] h-[380px] lg:w-[480px] lg:h-[500px] overflow-hidden rounded-2xl">
               <img
                 src="/images/correspondent.jpeg"
                 alt="Correspondent of SBRS"
