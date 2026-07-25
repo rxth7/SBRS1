@@ -153,9 +153,9 @@ export default function CampusGalleryPage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {visibleImages.map((img, i) => (
+            {visibleImages.map((img) => (
               <div
-                key={i < adminImages.length ? `admin-${i}` : `static-${i}`}
+                key={img.src}
                 className="rounded-xl overflow-hidden bg-forest/10 border border-forest/10 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col"
                 onClick={() => setLightbox(img)}
               >
@@ -163,8 +163,6 @@ export default function CampusGalleryPage() {
                   <img
                     src={img.src}
                     alt={img.alt}
-                    loading="lazy"
-                    decoding="async"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   />
                 </div>
